@@ -18,6 +18,12 @@ import {
   PackageMinus,
   Sparkles,
   ChevronRight,
+  CreditCard,
+  Copy,
+  Send,
+  MessageCircle,
+  Search,
+  Check,
 } from "lucide-react";
 
 /* ----------------------------- i18n ----------------------------- */
@@ -473,6 +479,210 @@ const STRINGS = {
   },
 };
 
+
+/* ---- Bill + control number + customer payment texts ---- */
+const PAY_CHANNELS = ["M-Pesa", "Tigo Pesa", "Airtel Money", "HaloPesa", "CRDB Bank", "NMB Bank"];
+
+const BILL_TEXT = {
+  sw: {
+    nav: { create: "Tengeneza Bili", pay: "Lipa Bili" },
+    create: {
+      title: "Tengeneza Bili",
+      subtitle: "Bili mpya ya mteja yenye vipengele vya bidhaa. Control Number itatengenezwa kiotomatiki.",
+      generate: "Tengeneza Bili",
+    },
+    pending: { colControl: "Control Number" },
+    actions: { newTransaction: "Bili Mpya", billSent: "Bili Imetumwa", payment: "Malipo" },
+    help: {
+      l1: () => <>Tumia <b>Tengeneza Bili</b> kutengeneza bili ya mteja na kupata Control Number.</>,
+      l2: () => <>Mteja analipa kupitia <b>Lipa Bili</b> kwa kutumia Control Number.</>,
+    },
+    bill: {
+      createdTitle: "Bili Imetengenezwa",
+      createdSub: "Mtumie mteja Control Number ili aweze kulipa.",
+      controlLabel: "Control Number",
+      customer: "Mteja",
+      amount: "Kiasi",
+      due: "Tarehe ya Mwisho",
+      messageLabel: "Ujumbe kwa mteja",
+      sendSms: "Tuma kwa SMS",
+      sendWhatsapp: "Tuma kwa WhatsApp",
+      copyNumber: "Nakili Namba",
+      copyMessage: "Nakili Ujumbe",
+      copied: "Imenakiliwa",
+      sent: "Imetumwa",
+      done: "Maliza",
+      note: "SMS na WhatsApp hufunguka kwenye kifaa chako ili ubonyeze Tuma. Hakuna ujumbe unaotumwa kiotomatiki bila wewe.",
+      message: (name, amount, control, due) =>
+        `Habari ${name}, bili yako ya ${amount} imetengenezwa. Control Number: ${control}. Tumia namba hii kulipa kabla ya ${due}. Asante. - BillManager`,
+    },
+    pay: {
+      title: "Lipa Bili",
+      subtitle: "Mteja huweka Control Number kuangalia na kulipa bili yake",
+      demo: "Hali ya majaribio: hakuna pesa halisi inayohamishwa. Malipo halisi yanahitaji kuunganishwa na mtoa huduma wa malipo (mfano GePG, Selcom au AzamPay).",
+      controlLabel: "Control Number",
+      controlPlaceholder: "Weka namba 12 za Control Number",
+      find: "Tafuta Bili",
+      notFound: "Control Number hii haipo. Hakikisha namba ni sahihi.",
+      details: "Maelezo ya Bili",
+      customer: "Mteja",
+      items: "Bidhaa",
+      total: "Jumla",
+      due: "Tarehe ya Mwisho",
+      status: "Hali",
+      alreadyPaid: (d) => `Bili hii tayari imelipwa tarehe ${d}.`,
+      expiredMsg: "Bili hii imeisha muda na haiwezi kulipwa tena. Wasiliana na muuzaji.",
+      chooseChannel: "Chagua njia ya kulipa",
+      accountLabel: "Namba ya simu / akaunti",
+      payButton: (amt) => `Lipa ${amt}`,
+      errChannel: "Chagua njia ya kulipa na weka namba ya simu au akaunti.",
+      confirmTitle: "Thibitisha Malipo",
+      confirmText: (ch, acc) => `Ombi la malipo la ${ch} limetumwa kwa ${acc}. Ingiza PIN kwenye simu yako kuthibitisha.`,
+      confirmButton: "Nimethibitisha Malipo (Jaribio)",
+      cancel: "Ghairi",
+      doneTitle: "Malipo Yamefanikiwa",
+      receipt: "Namba ya Risiti",
+      paidVia: "Njia ya malipo",
+      newPayment: "Lipa Bili Nyingine",
+    },
+  },
+  en: {
+    nav: { create: "Create Bill", pay: "Pay Bill" },
+    create: {
+      title: "Create Bill",
+      subtitle: "New customer bill with product line items. A control number is generated automatically.",
+      generate: "Create Bill",
+    },
+    pending: { colControl: "Control Number" },
+    actions: { newTransaction: "New Bill", billSent: "Bill Sent", payment: "Payment" },
+    help: {
+      l1: () => <>Use <b>Create Bill</b> to bill a customer and get a Control Number.</>,
+      l2: () => <>The customer pays through <b>Pay Bill</b> using the Control Number.</>,
+    },
+    bill: {
+      createdTitle: "Bill Created",
+      createdSub: "Send the customer this Control Number so they can pay.",
+      controlLabel: "Control Number",
+      customer: "Customer",
+      amount: "Amount",
+      due: "Due Date",
+      messageLabel: "Message to customer",
+      sendSms: "Send by SMS",
+      sendWhatsapp: "Send by WhatsApp",
+      copyNumber: "Copy Number",
+      copyMessage: "Copy Message",
+      copied: "Copied",
+      sent: "Sent",
+      done: "Done",
+      note: "SMS and WhatsApp open on your device so you can press Send. Nothing is sent automatically without you.",
+      message: (name, amount, control, due) =>
+        `Hello ${name}, your bill of ${amount} has been created. Control Number: ${control}. Use this number to pay before ${due}. Thank you. - BillManager`,
+    },
+    pay: {
+      title: "Pay Bill",
+      subtitle: "The customer enters the Control Number to view and pay their bill",
+      demo: "Demo mode: no real money moves. Real payments need a payment provider connection (for example GePG, Selcom or AzamPay).",
+      controlLabel: "Control Number",
+      controlPlaceholder: "Enter the 12-digit Control Number",
+      find: "Find Bill",
+      notFound: "This Control Number was not found. Please check the number.",
+      details: "Bill Details",
+      customer: "Customer",
+      items: "Items",
+      total: "Total",
+      due: "Due Date",
+      status: "Status",
+      alreadyPaid: (d) => `This bill was already paid on ${d}.`,
+      expiredMsg: "This bill has expired and can no longer be paid. Please contact the seller.",
+      chooseChannel: "Choose how to pay",
+      accountLabel: "Phone number / account",
+      payButton: (amt) => `Pay ${amt}`,
+      errChannel: "Choose a payment method and enter a phone number or account.",
+      confirmTitle: "Confirm Payment",
+      confirmText: (ch, acc) => `A ${ch} payment request was sent to ${acc}. Enter your PIN on your phone to confirm.`,
+      confirmButton: "I Confirmed the Payment (Demo)",
+      cancel: "Cancel",
+      doneTitle: "Payment Successful",
+      receipt: "Receipt Number",
+      paidVia: "Paid via",
+      newPayment: "Pay Another Bill",
+    },
+  },
+  fr: {
+    nav: { create: "Créer une Facture", pay: "Payer une Facture" },
+    create: {
+      title: "Créer une Facture",
+      subtitle: "Nouvelle facture client avec des articles. Un numéro de contrôle est généré automatiquement.",
+      generate: "Créer la Facture",
+    },
+    pending: { colControl: "N° de Contrôle" },
+    actions: { newTransaction: "Nouvelle Facture", billSent: "Facture Envoyée", payment: "Paiement" },
+    help: {
+      l1: () => <>Utilisez <b>Créer une Facture</b> pour facturer un client et obtenir un numéro de contrôle.</>,
+      l2: () => <>Le client paie via <b>Payer une Facture</b> avec le numéro de contrôle.</>,
+    },
+    bill: {
+      createdTitle: "Facture Créée",
+      createdSub: "Envoyez ce numéro de contrôle au client pour qu'il puisse payer.",
+      controlLabel: "N° de Contrôle",
+      customer: "Client",
+      amount: "Montant",
+      due: "Date d'Échéance",
+      messageLabel: "Message au client",
+      sendSms: "Envoyer par SMS",
+      sendWhatsapp: "Envoyer par WhatsApp",
+      copyNumber: "Copier le Numéro",
+      copyMessage: "Copier le Message",
+      copied: "Copié",
+      sent: "Envoyé",
+      done: "Terminer",
+      note: "SMS et WhatsApp s'ouvrent sur votre appareil pour que vous appuyiez sur Envoyer. Rien n'est envoyé automatiquement sans vous.",
+      message: (name, amount, control, due) =>
+        `Bonjour ${name}, votre facture de ${amount} a été créée. N° de contrôle : ${control}. Utilisez ce numéro pour payer avant le ${due}. Merci. - BillManager`,
+    },
+    pay: {
+      title: "Payer une Facture",
+      subtitle: "Le client saisit le numéro de contrôle pour consulter et payer sa facture",
+      demo: "Mode démo : aucun argent réel n'est déplacé. Les vrais paiements nécessitent une connexion à un prestataire de paiement (par exemple GePG, Selcom ou AzamPay).",
+      controlLabel: "N° de Contrôle",
+      controlPlaceholder: "Saisissez le numéro de contrôle à 12 chiffres",
+      find: "Rechercher la Facture",
+      notFound: "Ce numéro de contrôle est introuvable. Vérifiez le numéro.",
+      details: "Détails de la Facture",
+      customer: "Client",
+      items: "Articles",
+      total: "Total",
+      due: "Date d'Échéance",
+      status: "Statut",
+      alreadyPaid: (d) => `Cette facture a déjà été payée le ${d}.`,
+      expiredMsg: "Cette facture a expiré et ne peut plus être payée. Contactez le vendeur.",
+      chooseChannel: "Choisissez le mode de paiement",
+      accountLabel: "Numéro de téléphone / compte",
+      payButton: (amt) => `Payer ${amt}`,
+      errChannel: "Choisissez un mode de paiement et saisissez un numéro de téléphone ou de compte.",
+      confirmTitle: "Confirmer le Paiement",
+      confirmText: (ch, acc) => `Une demande de paiement ${ch} a été envoyée à ${acc}. Saisissez votre code PIN sur votre téléphone pour confirmer.`,
+      confirmButton: "J'ai Confirmé le Paiement (Démo)",
+      cancel: "Annuler",
+      doneTitle: "Paiement Réussi",
+      receipt: "Numéro de Reçu",
+      paidVia: "Payé via",
+      newPayment: "Payer une Autre Facture",
+    },
+  },
+};
+
+Object.keys(BILL_TEXT).forEach((l) => {
+  const o = BILL_TEXT[l];
+  STRINGS[l].nav = { ...STRINGS[l].nav, ...o.nav };
+  STRINGS[l].create = { ...STRINGS[l].create, ...o.create };
+  STRINGS[l].pending = { ...STRINGS[l].pending, ...o.pending };
+  STRINGS[l].help = { ...STRINGS[l].help, ...o.help };
+  STRINGS[l].bill = o.bill;
+  STRINGS[l].pay = o.pay;
+  Object.assign(ACTION_LABELS[l], o.actions);
+});
+
 const LangContext = createContext({ lang: "sw", setLang: () => {}, s: STRINGS.sw });
 const useLang = () => useContext(LangContext);
 
@@ -559,6 +769,36 @@ const seedBills = [
     created: "2026-06-01", due: "2026-06-15", paid: null, status: "expired",
   },
 ];
+
+const SEED_CONTROLS = {
+  "INV-1256": "991100256001",
+  "INV-0041": "991100041002",
+  "INV-0040": "991100040003",
+  "INV-0038": "991100038004",
+  "INV-0033": "991100033005",
+  "INV-0035": "991100035006",
+};
+seedBills.forEach((b) => {
+  b.control = SEED_CONTROLS[b.invoice];
+  b.sent = true;
+});
+
+function genControl(existing) {
+  let c;
+  do {
+    c = "99" + String(Math.floor(Math.random() * 1e10)).padStart(10, "0");
+  } while (existing.includes(c));
+  return c;
+}
+
+function fmtControl(c) {
+  return c ? c.replace(/(\d{4})(?=\d)/g, "$1 ") : "—";
+}
+
+function phoneDigits(p) {
+  const d = String(p).replace(/\D/g, "");
+  return d.startsWith("0") ? "255" + d.slice(1) : d;
+}
 
 const seedTransfers = [
   { id: "TR-001", product: "Coartem 20/120mg", batch: "BT-3105", qty: 20, from: "depot", to: "arusha", date: "2026-08-15", status: "completed" },
@@ -869,10 +1109,11 @@ function BillsTable({ bills, showMarkPaid, onMarkPaid, statusOverride }) {
   const st = STATUS_LABELS[lang];
   return (
     <Card className="overflow-x-auto">
-      <table className="w-full" style={{ minWidth: "820px" }}>
+      <table className="w-full" style={{ minWidth: "980px" }}>
         <thead className="bg-white/5">
           <tr>
             <Th>{t.colTransaction}</Th>
+            <Th>{t.colControl}</Th>
             <Th>{t.colCustomer}</Th>
             <Th>{t.colPhone}</Th>
             <Th>{t.colItems}</Th>
@@ -892,6 +1133,7 @@ function BillsTable({ bills, showMarkPaid, onMarkPaid, statusOverride }) {
             return (
               <tr key={b.id} className="border-t border-white/10 hover:bg-white/5 transition-colors">
                 <Td className="text-indigo-300 font-mono font-medium text-xs">{b.invoice}</Td>
+                <Td className="text-slate-300 font-mono text-xs">{fmtControl(b.control)}</Td>
                 <Td className="text-slate-100 font-medium">{b.customer}</Td>
                 <Td className="text-slate-500">{b.phone}</Td>
                 <Td>{b.items.length} {s.common.items}</Td>
@@ -913,7 +1155,7 @@ function BillsTable({ bills, showMarkPaid, onMarkPaid, statusOverride }) {
           })}
           {bills.length === 0 && (
             <tr>
-              <td colSpan={9} className="text-center text-sm text-slate-600 py-14">
+              <td colSpan={10} className="text-center text-sm text-slate-600 py-14">
                 {s.common.noRecords}
               </td>
             </tr>
@@ -1285,17 +1527,303 @@ function TransferView({ inventory, transfers, onSubmitTransfer }) {
   );
 }
 
+
+function BillCreatedModal({ bill, onClose, onSent }) {
+  const { lang, s } = useLang();
+  const t = s.bill;
+  const [copied, setCopied] = useState("");
+  const total = billTotal(bill);
+  const message = t.message(bill.customer, fmtTZS(total), fmtControl(bill.control), fmtDate(bill.due, lang));
+  const enc = encodeURIComponent(message);
+  const digits = phoneDigits(bill.phone);
+
+  const copy = async (text, key) => {
+    try {
+      await navigator.clipboard.writeText(text);
+    } catch (e) {
+      /* clipboard may be blocked; ignore */
+    }
+    setCopied(key);
+    setTimeout(() => setCopied(""), 1500);
+  };
+
+  return (
+    <div className="fixed inset-0 z-20 bg-black/60 flex items-center justify-center p-4 overflow-y-auto">
+      <div className="w-full max-w-lg bg-slate-900 border border-white/10 rounded-2xl p-6 shadow-2xl my-8">
+        <div className="flex items-start gap-3 mb-5">
+          <div className="w-10 h-10 rounded-xl bg-emerald-400/10 text-emerald-300 flex items-center justify-center ring-1 ring-emerald-400/20 shrink-0">
+            <Check size={20} />
+          </div>
+          <div>
+            <h2 className="text-xl font-semibold text-slate-50">{t.createdTitle}</h2>
+            <p className="text-sm text-slate-500 mt-0.5">{t.createdSub}</p>
+          </div>
+        </div>
+
+        <div className="bg-slate-950 border border-indigo-400/20 rounded-xl p-4 mb-4 text-center">
+          <div className="text-xs font-medium tracking-wide text-slate-500 uppercase mb-2">{t.controlLabel}</div>
+          <div className="text-3xl font-mono font-semibold text-indigo-300 tracking-wider">{fmtControl(bill.control)}</div>
+          <button
+            onClick={() => copy(bill.control, "num")}
+            className="mt-3 inline-flex items-center gap-1.5 text-xs text-slate-400 hover:text-slate-200"
+          >
+            {copied === "num" ? <Check size={13} /> : <Copy size={13} />} {copied === "num" ? t.copied : t.copyNumber}
+          </button>
+        </div>
+
+        <div className="grid grid-cols-3 gap-3 mb-4 text-sm">
+          <div>
+            <div className="text-xs text-slate-500 uppercase tracking-wide mb-1">{t.customer}</div>
+            <div className="text-slate-100 font-medium">{bill.customer}</div>
+            <div className="text-xs text-slate-500">{bill.phone}</div>
+          </div>
+          <div>
+            <div className="text-xs text-slate-500 uppercase tracking-wide mb-1">{t.amount}</div>
+            <div className="text-slate-100 font-semibold">{fmtTZS(total)}</div>
+          </div>
+          <div>
+            <div className="text-xs text-slate-500 uppercase tracking-wide mb-1">{t.due}</div>
+            <div className="text-slate-100">{fmtDate(bill.due, lang)}</div>
+          </div>
+        </div>
+
+        <div className="mb-4">
+          <div className="text-xs font-medium tracking-wide text-slate-500 uppercase mb-2">{t.messageLabel}</div>
+          <div className="bg-slate-950 border border-white/10 rounded-lg p-3 text-xs text-slate-400 leading-relaxed">{message}</div>
+        </div>
+
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 mb-3">
+          <a
+            href={`sms:${bill.phone.replace(/\s/g, "")}?body=${enc}`}
+            onClick={() => onSent(bill.id)}
+            className="inline-flex items-center justify-center gap-2 bg-indigo-500 hover:bg-indigo-400 text-white text-sm font-medium px-4 py-2.5 rounded-xl transition-colors"
+          >
+            <Send size={15} /> {t.sendSms}
+          </a>
+          <a
+            href={`https://wa.me/${digits}?text=${enc}`}
+            target="_blank"
+            rel="noreferrer"
+            onClick={() => onSent(bill.id)}
+            className="inline-flex items-center justify-center gap-2 bg-emerald-500 hover:bg-emerald-400 text-white text-sm font-medium px-4 py-2.5 rounded-xl transition-colors"
+          >
+            <MessageCircle size={15} /> {t.sendWhatsapp}
+          </a>
+        </div>
+        <div className="flex items-center justify-between mb-5">
+          <GhostButton onClick={() => copy(message, "msg")}>
+            {copied === "msg" ? <Check size={13} /> : <Copy size={13} />} {copied === "msg" ? t.copied : t.copyMessage}
+          </GhostButton>
+          {bill.sent && <Badge tone="paid">{t.sent}</Badge>}
+        </div>
+
+        <p className="text-xs text-slate-600 mb-5">{t.note}</p>
+
+        <PrimaryButton onClick={onClose} className="w-full justify-center">
+          {t.done}
+        </PrimaryButton>
+      </div>
+    </div>
+  );
+}
+
+function PayView({ bills, onPay }) {
+  const { lang, s } = useLang();
+  const t = s.pay;
+  const st = STATUS_LABELS[lang];
+  const [input, setInput] = useState("");
+  const [foundId, setFoundId] = useState(null);
+  const [notFound, setNotFound] = useState(false);
+  const [channel, setChannel] = useState("");
+  const [account, setAccount] = useState("");
+  const [step, setStep] = useState("lookup"); // lookup | confirm | done
+  const [error, setError] = useState("");
+  const [receipt, setReceipt] = useState("");
+
+  const bill = bills.find((b) => b.id === foundId);
+
+  const find = () => {
+    const digits = input.replace(/\D/g, "");
+    const b = bills.find((x) => x.control === digits);
+    setStep("lookup");
+    setError("");
+    if (b) {
+      setFoundId(b.id);
+      setNotFound(false);
+      setAccount(b.phone);
+      setChannel("");
+    } else {
+      setFoundId(null);
+      setNotFound(true);
+    }
+  };
+
+  const startPay = () => {
+    if (!channel || !account.trim()) {
+      setError(t.errChannel);
+      return;
+    }
+    setError("");
+    setStep("confirm");
+  };
+
+  const confirmPay = () => {
+    const ref = "RCPT-" + String(Math.floor(Math.random() * 1e8)).padStart(8, "0");
+    setReceipt(ref);
+    onPay(bill.id, channel);
+    setStep("done");
+  };
+
+  const reset = () => {
+    setInput("");
+    setFoundId(null);
+    setNotFound(false);
+    setChannel("");
+    setAccount("");
+    setStep("lookup");
+    setError("");
+  };
+
+  const total = bill ? billTotal(bill) : 0;
+  const isOverdue = bill && bill.status === "pending" && daysBetween(TODAY, bill.due) > 0;
+  const tone = !bill ? "pending" : bill.status === "paid" ? "paid" : bill.status === "expired" ? "expired" : isOverdue ? "overdue" : "pending";
+
+  return (
+    <div>
+      <PageHeader title={t.title} subtitle={t.subtitle} icon={CreditCard} />
+
+      <div className="mb-6 bg-amber-400/10 border border-amber-400/20 rounded-xl px-4 py-3 text-xs text-amber-200">{t.demo}</div>
+
+      <div className="max-w-xl space-y-5">
+        <Card className="p-5">
+          <Field label={t.controlLabel}>
+            <div className="flex gap-2">
+              <input
+                value={input}
+                onChange={(e) => setInput(e.target.value)}
+                onKeyDown={(e) => e.key === "Enter" && find()}
+                placeholder={t.controlPlaceholder}
+                className={inputCls + " font-mono"}
+              />
+              <PrimaryButton onClick={find}>
+                <Search size={15} /> {t.find}
+              </PrimaryButton>
+            </div>
+          </Field>
+          {notFound && <div className="text-xs text-rose-400 mt-3">{t.notFound}</div>}
+        </Card>
+
+        {bill && step !== "done" && (
+          <Card className="p-5">
+            <div className="flex items-center justify-between mb-4">
+              <div className="text-xs font-medium tracking-wide text-slate-500 uppercase">{t.details}</div>
+              <Badge tone={tone}>{st[tone]}</Badge>
+            </div>
+            <div className="grid grid-cols-2 gap-4 text-sm mb-4">
+              <div>
+                <div className="text-xs text-slate-500 uppercase tracking-wide mb-1">{t.customer}</div>
+                <div className="text-slate-100 font-medium">{bill.customer}</div>
+              </div>
+              <div>
+                <div className="text-xs text-slate-500 uppercase tracking-wide mb-1">{t.due}</div>
+                <div className="text-slate-100">{fmtDate(bill.due, lang)}</div>
+              </div>
+            </div>
+            <div className="border border-white/10 rounded-lg divide-y divide-white/10 mb-4">
+              {bill.items.map((it, idx) => (
+                <div key={idx} className="flex items-center justify-between px-3 py-2 text-sm">
+                  <span className="text-slate-300">{it.product} <span className="text-slate-600">× {it.qty}</span></span>
+                  <span className="text-slate-100">{fmtTZS(it.qty * it.unitPrice)}</span>
+                </div>
+              ))}
+              <div className="flex items-center justify-between px-3 py-2.5 bg-white/5 rounded-b-lg">
+                <span className="text-xs uppercase tracking-wide text-slate-500">{t.total}</span>
+                <span className="text-lg font-semibold text-slate-50">{fmtTZS(total)}</span>
+              </div>
+            </div>
+
+            {bill.status === "paid" && (
+              <div className="text-sm text-emerald-300">{t.alreadyPaid(fmtDate(bill.paid, lang))}</div>
+            )}
+            {bill.status === "expired" && <div className="text-sm text-rose-300">{t.expiredMsg}</div>}
+
+            {bill.status === "pending" && step === "lookup" && (
+              <div className="space-y-4">
+                <div>
+                  <div className="text-xs font-medium tracking-wide text-slate-500 uppercase mb-2">{t.chooseChannel}</div>
+                  <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
+                    {PAY_CHANNELS.map((ch) => (
+                      <button
+                        key={ch}
+                        onClick={() => setChannel(ch)}
+                        className={`text-sm px-3 py-2.5 rounded-lg border transition-colors ${
+                          channel === ch
+                            ? "bg-indigo-500/20 border-indigo-400/50 text-indigo-200"
+                            : "border-white/10 text-slate-400 hover:border-white/25 hover:text-slate-200"
+                        }`}
+                      >
+                        {ch}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+                <Field label={t.accountLabel}>
+                  <input value={account} onChange={(e) => setAccount(e.target.value)} className={inputCls} />
+                </Field>
+                {error && <div className="text-xs text-rose-400">{error}</div>}
+                <PrimaryButton onClick={startPay} className="w-full justify-center">
+                  <CreditCard size={15} /> {t.payButton(fmtTZS(total))}
+                </PrimaryButton>
+              </div>
+            )}
+
+            {bill.status === "pending" && step === "confirm" && (
+              <div className="space-y-4">
+                <div className="text-sm font-semibold text-slate-100">{t.confirmTitle}</div>
+                <p className="text-sm text-slate-400">{t.confirmText(channel, account)}</p>
+                <div className="flex gap-2">
+                  <PrimaryButton onClick={confirmPay}>
+                    <Check size={15} /> {t.confirmButton}
+                  </PrimaryButton>
+                  <GhostButton onClick={() => setStep("lookup")}>{t.cancel}</GhostButton>
+                </div>
+              </div>
+            )}
+          </Card>
+        )}
+
+        {bill && step === "done" && (
+          <Card className="p-6 text-center">
+            <div className="w-12 h-12 mx-auto rounded-full bg-emerald-400/10 text-emerald-300 flex items-center justify-center ring-1 ring-emerald-400/20 mb-4">
+              <Check size={24} />
+            </div>
+            <h2 className="text-xl font-semibold text-slate-50 mb-1">{t.doneTitle}</h2>
+            <div className="text-2xl font-semibold text-emerald-300 mb-4">{fmtTZS(total)}</div>
+            <div className="text-xs text-slate-500 space-y-1 mb-5">
+              <div>{t.receipt}: <span className="font-mono text-slate-300">{receipt}</span></div>
+              <div>{t.paidVia}: <span className="text-slate-300">{channel}</span></div>
+              <div>{bill.customer} · <span className="font-mono">{fmtControl(bill.control)}</span></div>
+            </div>
+            <GhostButton onClick={reset} className="mx-auto">{t.newPayment}</GhostButton>
+          </Card>
+        )}
+      </div>
+    </div>
+  );
+}
+
 /* ----------------------------- shell ----------------------------- */
 
 const NAV_ICONS = {
   create: Plus,
+  pay: CreditCard,
   pending: RotateCw,
   history: CheckCircle2,
   expired: XCircle,
   stock: ArrowUpDown,
   transfer: ArrowLeftRight,
 };
-const NAV_ORDER = ["create", "pending", "history", "expired", "stock", "transfer"];
+const NAV_ORDER = ["create", "pending", "pay", "history", "expired", "stock", "transfer"];
 
 function LanguageSwitcher({ lang, setLang }) {
   return (
@@ -1323,6 +1851,7 @@ export default function App() {
   const [transfers, setTransfers] = useState(seedTransfers);
   const [auditLog, setAuditLog] = useState(seedAudit);
   const [showHelp, setShowHelp] = useState(false);
+  const [createdBill, setCreatedBill] = useState(null);
 
   const s = STRINGS[lang];
 
@@ -1339,12 +1868,28 @@ export default function App() {
 
   const handleGenerateBill = (data) => {
     const invoice = "INV-" + String(2000 + bills.length).padStart(4, "0");
-    setBills((bs) => [
-      { id: nextId(), invoice, customer: data.customer, phone: data.phone, items: data.items, created: TODAY, due: data.due, paid: null, status: "pending" },
-      ...bs,
-    ]);
-    addAudit("newTransaction", `${invoice} · ${data.customer} · ${fmtTZS(data.items.reduce((s2, it) => s2 + it.qty * it.unitPrice, 0))}`);
-    setView("pending");
+    const control = genControl(bills.map((b) => b.control));
+    const newBill = {
+      id: nextId(), invoice, control, sent: false,
+      customer: data.customer, phone: data.phone, items: data.items,
+      created: TODAY, due: data.due, paid: null, status: "pending",
+    };
+    setBills((bs) => [newBill, ...bs]);
+    addAudit("newTransaction", `${invoice} · ${data.customer} · ${fmtControl(control)} · ${fmtTZS(data.items.reduce((s2, it) => s2 + it.qty * it.unitPrice, 0))}`);
+    setCreatedBill(newBill);
+  };
+
+  const handleBillSent = (id) => {
+    const target = bills.find((b) => b.id === id);
+    if (target && !target.sent) addAudit("billSent", `${target.invoice} · ${target.phone}`);
+    setBills((bs) => bs.map((b) => (b.id === id ? { ...b, sent: true } : b)));
+    setCreatedBill((cb) => (cb && cb.id === id ? { ...cb, sent: true } : cb));
+  };
+
+  const handlePay = (id, channel) => {
+    const target = bills.find((b) => b.id === id);
+    setBills((bs) => bs.map((b) => (b.id === id ? { ...b, status: "paid", paid: TODAY } : b)));
+    if (target) addAudit("payment", `${target.invoice} · ${target.customer} · ${channel}`);
   };
 
   const handleMarkPaid = (id) => {
@@ -1437,6 +1982,7 @@ export default function App() {
           <main className="flex-1 min-w-0 px-8 py-8 max-w-6xl relative bg-slate-950">
             {view === "create" && <CreateBillView inventory={inventory} onGenerate={handleGenerateBill} />}
             {view === "pending" && <PendingBillsView bills={bills} onMarkPaid={handleMarkPaid} />}
+            {view === "pay" && <PayView bills={bills} onPay={handlePay} />}
             {view === "history" && <PaymentHistoryView bills={bills} />}
             {view === "expired" && <ExpiredBillsView bills={bills} />}
             {view === "stock" && (
@@ -1444,6 +1990,17 @@ export default function App() {
             )}
             {view === "transfer" && <TransferView inventory={inventory} transfers={transfers} onSubmitTransfer={handleSubmitTransfer} />}
           </main>
+
+          {createdBill && (
+            <BillCreatedModal
+              bill={createdBill}
+              onSent={handleBillSent}
+              onClose={() => {
+                setCreatedBill(null);
+                setView("pending");
+              }}
+            />
+          )}
 
           {/* Help button */}
           <div className="fixed bottom-6 right-6 z-10">
