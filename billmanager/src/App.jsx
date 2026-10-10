@@ -24,6 +24,7 @@ import {
   MessageCircle,
   Search,
   Check,
+  Menu,
 } from "lucide-react";
 
 /* ----------------------------- i18n ----------------------------- */
@@ -840,7 +841,7 @@ function Stat({ label, value, sub, tone = "default", icon: Icon }) {
   const iconBg =
     tone === "danger" ? "bg-rose-400/10 text-rose-300" : tone === "warn" ? "bg-amber-400/10 text-amber-300" : "bg-indigo-400/10 text-indigo-300";
   return (
-    <div className="bg-slate-900 border border-white/10 rounded-2xl px-5 py-4 shadow-md hover:border-white/20 transition-colors">
+    <div className="bg-slate-900 border border-white/10 rounded-2xl px-4 py-3 md:px-5 md:py-4 shadow-md hover:border-white/20 transition-colors">
       <div className="flex items-center justify-between mb-3">
         <div className="text-xs font-medium tracking-wide text-slate-500 uppercase">{label}</div>
         {Icon && (
@@ -849,7 +850,7 @@ function Stat({ label, value, sub, tone = "default", icon: Icon }) {
           </div>
         )}
       </div>
-      <div className={`text-2xl leading-none font-semibold tracking-tight ${toneCls}`}>{value}</div>
+      <div className={`text-lg md:text-2xl leading-tight font-semibold tracking-tight break-words ${toneCls}`}>{value}</div>
       {sub && <div className="text-xs text-slate-500 mt-1.5">{sub}</div>}
     </div>
   );
@@ -857,14 +858,14 @@ function Stat({ label, value, sub, tone = "default", icon: Icon }) {
 
 function PageHeader({ title, subtitle, icon: Icon }) {
   return (
-    <div className="mb-7 pb-6 border-b border-white/10 flex items-start gap-4">
+    <div className="mb-5 pb-4 md:mb-7 md:pb-6 border-b border-white/10 flex items-start gap-3 md:gap-4">
       {Icon && (
-        <div className="w-11 h-11 rounded-xl bg-indigo-500/10 text-indigo-300 flex items-center justify-center ring-1 ring-indigo-400/20 shrink-0">
+        <div className="w-9 h-9 md:w-11 md:h-11 rounded-xl bg-indigo-500/10 text-indigo-300 flex items-center justify-center ring-1 ring-indigo-400/20 shrink-0">
           <Icon size={20} />
         </div>
       )}
       <div>
-        <h1 className="text-2xl font-semibold text-slate-50 tracking-tight">{title}</h1>
+        <h1 className="text-xl md:text-2xl font-semibold text-slate-50 tracking-tight">{title}</h1>
         <p className="text-sm text-slate-500 mt-1">{subtitle}</p>
       </div>
     </div>
@@ -1018,7 +1019,7 @@ function CreateBillView({ inventory, onGenerate }) {
         </GhostButton>
       </div>
 
-      <Card className="overflow-hidden mb-2">
+      <Card className="hidden md:block overflow-hidden mb-2">
         <table className="w-full">
           <thead className="bg-white/5">
             <tr>
@@ -1089,13 +1090,49 @@ function CreateBillView({ inventory, onGenerate }) {
         </table>
       </Card>
 
+      <div className="md:hidden space-y-3 mb-2">
+        {rows.map((r, idx) => (
+          <Card key={r.rid} className="p-4 space-y-3">
+            <div className="flex items-center justify-between">
+              <span className="text-xs text-slate-500 uppercase tracking-wide">#{idx + 1}</span>
+              <button onClick={() => removeRow(r.rid)} className="text-slate-600 hover:text-rose-400 transition-colors">
+                <Trash2 size={15} />
+              </button>
+            </div>
+            <Field label={t.colProduct}>
+              <input value={r.product} onChange={(e) => updateRow(r.rid, { product: e.target.value })} placeholder={t.productPlaceholder} className={inputCls} />
+            </Field>
+            <div className="grid grid-cols-2 gap-3">
+              <Field label={t.colQty}>
+                <input type="number" min="1" value={r.qty} onChange={(e) => updateRow(r.rid, { qty: e.target.value })} className={inputCls} />
+              </Field>
+              <Field label={t.colUnitPrice}>
+                <input type="number" min="0" value={r.unitPrice} onChange={(e) => updateRow(r.rid, { unitPrice: e.target.value })} className={inputCls} />
+              </Field>
+            </div>
+            <div className="grid grid-cols-2 gap-3">
+              <Field label={t.colBatch}>
+                <input value={r.batch} onChange={(e) => updateRow(r.rid, { batch: e.target.value })} className={inputCls + " font-mono"} />
+              </Field>
+              <Field label={t.colExpiry}>
+                <input type="date" value={r.expiry} onChange={(e) => updateRow(r.rid, { expiry: e.target.value })} className={inputCls} />
+              </Field>
+            </div>
+            <div className="flex items-center justify-between pt-3 border-t border-white/10">
+              <span className="text-xs text-slate-500 uppercase tracking-wide">{t.colSubtotal}</span>
+              <span className="text-slate-50 font-semibold">{fmtTZS((Number(r.qty) || 0) * (Number(r.unitPrice) || 0))}</span>
+            </div>
+          </Card>
+        ))}
+      </div>
+
       {error && <div className="text-xs text-rose-400 mb-4 mt-2">{error}</div>}
 
-      <div className="flex items-center justify-between mt-7">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mt-7">
         <div className="text-slate-500 text-sm">
           {t.total} <span className="block text-3xl font-semibold text-slate-50 tracking-tight mt-0.5">{fmtTZS(total)}</span>
         </div>
-        <PrimaryButton onClick={handleGenerate}>
+        <PrimaryButton onClick={handleGenerate} className="w-full sm:w-auto justify-center">
           {t.generate} <ChevronRight size={15} />
         </PrimaryButton>
       </div>
@@ -1107,8 +1144,54 @@ function BillsTable({ bills, showMarkPaid, onMarkPaid, statusOverride }) {
   const { lang, s } = useLang();
   const t = s.pending;
   const st = STATUS_LABELS[lang];
+  const billTone = (b) =>
+    statusOverride ||
+    (b.status === "paid" ? "paid" : b.status === "expired" ? "expired" : b.status === "pending" && daysBetween(TODAY, b.due) > 0 ? "overdue" : "pending");
+  const mobileList = (
+    <div className="md:hidden space-y-3">
+      {bills.map((b) => {
+        const tone = billTone(b);
+        return (
+          <Card key={b.id} className="p-4">
+            <div className="flex items-start justify-between gap-3 mb-3">
+              <div className="min-w-0">
+                <div className="text-slate-100 font-medium truncate">{b.customer}</div>
+                <div className="text-xs text-slate-500">{b.phone}</div>
+              </div>
+              <Badge tone={tone}>{st[tone]}</Badge>
+            </div>
+            <div className="grid grid-cols-2 gap-3 mb-3">
+              <div>
+                <div className="text-xs text-slate-500 uppercase tracking-wide mb-0.5">{t.colTotal}</div>
+                <div className="text-slate-50 font-semibold">{fmtTZS(billTotal(b))}</div>
+              </div>
+              <div>
+                <div className="text-xs text-slate-500 uppercase tracking-wide mb-0.5">{t.colDuePaid}</div>
+                <div className="text-slate-300 text-sm">{fmtDate(b.paid || b.due, lang)}</div>
+              </div>
+              <div className="col-span-2">
+                <div className="text-xs text-slate-500 uppercase tracking-wide mb-0.5">{t.colControl}</div>
+                <div className="font-mono text-indigo-300 text-sm">{fmtControl(b.control)}</div>
+              </div>
+            </div>
+            <div className="flex items-center justify-between gap-2 pt-3 border-t border-white/10">
+              <span className="text-xs text-slate-600 font-mono">{b.invoice} · {b.items.length} {s.common.items}</span>
+              {showMarkPaid && (
+                <GhostButton onClick={() => onMarkPaid(b.id)} className="hover:!border-emerald-400/50 hover:!text-emerald-300">
+                  <CheckCircle2 size={13} /> {t.markPaid}
+                </GhostButton>
+              )}
+            </div>
+          </Card>
+        );
+      })}
+      {bills.length === 0 && <div className="text-center text-sm text-slate-600 py-10">{s.common.noRecords}</div>}
+    </div>
+  );
   return (
-    <Card className="overflow-x-auto">
+    <>
+    {mobileList}
+    <Card className="hidden md:block overflow-x-auto">
       <table className="w-full" style={{ minWidth: "980px" }}>
         <thead className="bg-white/5">
           <tr>
@@ -1163,6 +1246,7 @@ function BillsTable({ bills, showMarkPaid, onMarkPaid, statusOverride }) {
         </tbody>
       </table>
     </Card>
+    </>
   );
 }
 
@@ -1283,18 +1367,18 @@ function StockManagementView({ inventory, onStockChange, auditLog, addAudit }) {
     <div>
       <PageHeader title={t.title} subtitle={t.subtitle} icon={Boxes} />
 
-      <div className="grid grid-cols-3 gap-4 mb-7 max-w-2xl">
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 md:gap-4 mb-7 max-w-2xl">
         <Stat label={t.statSku} value={inventory.length} icon={Boxes} />
         <Stat label={t.statExpiringSoon} value={expiringSoon.length} sub={t.subWithin90} tone={expiringSoon.length ? "warn" : "default"} icon={Clock} />
         <Stat label={t.statExpiredStock} value={expiredStock.length} tone={expiredStock.length ? "danger" : "default"} icon={AlertTriangle} />
       </div>
 
-      <div className="flex gap-1 mb-6 bg-white/5 p-1 rounded-xl w-fit">
+      <div className="flex gap-1 mb-6 bg-white/5 p-1 rounded-xl w-fit max-w-full overflow-x-auto">
         {tabs.map((tb) => (
           <button
             key={tb.key}
             onClick={() => setTab(tb.key)}
-            className={`text-xs font-medium px-3.5 py-2 rounded-lg transition-colors ${
+            className={`text-xs font-medium px-3.5 py-2 rounded-lg transition-colors whitespace-nowrap shrink-0 ${
               tab === tb.key ? "bg-indigo-500 text-white shadow-sm" : "text-slate-400 hover:text-slate-200"
             }`}
           >
@@ -1304,7 +1388,46 @@ function StockManagementView({ inventory, onStockChange, auditLog, addAudit }) {
       </div>
 
       {tab === "inventory" && (
-        <Card className="overflow-x-auto">
+        <>
+        <div className="md:hidden space-y-3">
+          {inventory.map((it) => {
+            const age = daysBetween(TODAY, it.received);
+            const expDays = daysBetween(it.expiry, TODAY);
+            return (
+              <Card key={it.id} className="p-4">
+                <div className="flex items-start justify-between gap-3 mb-3">
+                  <div className="min-w-0">
+                    <div className="text-slate-100 font-medium">{it.product}</div>
+                    <div className="text-xs text-slate-500 font-mono">{it.batch}</div>
+                  </div>
+                  <div className={`text-lg font-semibold ${it.qty === 0 ? "text-rose-300" : "text-emerald-300"}`}>{it.qty}</div>
+                </div>
+                <div className="grid grid-cols-2 gap-3 text-sm">
+                  <div>
+                    <div className="text-xs text-slate-500 uppercase tracking-wide mb-0.5">{t.colUnitPrice}</div>
+                    <div className="text-slate-300">{fmtTZS(it.unitPrice)}</div>
+                  </div>
+                  <div>
+                    <div className="text-xs text-slate-500 uppercase tracking-wide mb-0.5">{t.colExpiry}</div>
+                    <div className={expDays < 0 ? "text-rose-300" : expDays <= 90 ? "text-amber-300" : "text-slate-300"}>{it.expiry.slice(0, 7)}</div>
+                  </div>
+                  <div>
+                    <div className="text-xs text-slate-500 uppercase tracking-wide mb-0.5">{t.colReceived}</div>
+                    <div className="text-slate-300">{fmtDate(it.received, lang)}</div>
+                  </div>
+                  <div>
+                    <div className="text-xs text-slate-500 uppercase tracking-wide mb-0.5">{t.colAge}</div>
+                    <div className={it.id === oldestId ? "text-amber-300 font-medium" : "text-slate-300"}>
+                      {it.id === oldestId ? s.common.oldest : s.common.daysAgo(age)}
+                    </div>
+                  </div>
+                </div>
+                <div className="text-xs text-slate-600 mt-3 pt-3 border-t border-white/10">{it.supplier}</div>
+              </Card>
+            );
+          })}
+        </div>
+        <Card className="hidden md:block overflow-x-auto">
           <table className="w-full" style={{ minWidth: "820px" }}>
             <thead className="bg-white/5">
               <tr>
@@ -1342,6 +1465,7 @@ function StockManagementView({ inventory, onStockChange, auditLog, addAudit }) {
             </tbody>
           </table>
         </Card>
+        </>
       )}
 
       {tab === "stockin" && (
@@ -1385,7 +1509,7 @@ function StockManagementView({ inventory, onStockChange, auditLog, addAudit }) {
       {tab === "audit" && (
         <Card className="divide-y divide-white/10">
           {auditLog.map((a) => (
-            <div key={a.id} className="px-5 py-3.5 flex items-start gap-4">
+            <div key={a.id} className="px-4 md:px-5 py-3.5 flex flex-col items-start sm:flex-row gap-1.5 sm:gap-4">
               <span className="text-xs text-slate-600 w-24 shrink-0 pt-0.5 font-mono">{fmtDate(a.date, lang)}</span>
               <Badge tone="info">{ACTION_LABELS[lang][a.action] || a.action}</Badge>
               <span className="text-sm text-slate-300">{a.detail}</span>
@@ -1451,7 +1575,7 @@ function TransferView({ inventory, transfers, onSubmitTransfer }) {
               <input type="number" min="1" value={qty} onChange={(e) => setQty(e.target.value)} className={inputCls} />
             </Field>
           </div>
-          <div className="grid grid-cols-2 gap-4 mb-5">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-5">
             <Field label={t.fromLabel}>
               <select value={from} onChange={(e) => setFrom(e.target.value)} className={inputCls}>
                 <option value="">{t.selectPlaceholder}</option>
@@ -1489,7 +1613,29 @@ function TransferView({ inventory, transfers, onSubmitTransfer }) {
       </div>
 
       <div className="text-xs font-medium tracking-wide text-slate-500 uppercase mb-3">{t.log}</div>
-      <Card className="overflow-x-auto">
+      <div className="md:hidden space-y-3">
+        {transfers.map((tr) => (
+          <Card key={tr.id} className="p-4">
+            <div className="flex items-start justify-between gap-3 mb-3">
+              <div className="min-w-0">
+                <div className="text-slate-100 font-medium">{tr.product}</div>
+                <div className="text-xs text-slate-500 font-mono">{tr.id} · {tr.batch}</div>
+              </div>
+              <Badge tone={tr.status === "completed" ? "paid" : "pending"}>
+                {tr.status === "completed" ? st.transferCompleted : st.transferPending}
+              </Badge>
+            </div>
+            <div className="text-sm text-slate-300 mb-2">
+              {locLabels[tr.from]} <span className="text-slate-600">→</span> {locLabels[tr.to]}
+            </div>
+            <div className="flex items-center justify-between text-xs text-slate-500">
+              <span>{t.colQty}: <span className="text-slate-200 font-semibold">{tr.qty}</span></span>
+              <span>{fmtDate(tr.date, lang)}</span>
+            </div>
+          </Card>
+        ))}
+      </div>
+      <Card className="hidden md:block overflow-x-auto">
         <table className="w-full" style={{ minWidth: "760px" }}>
           <thead className="bg-white/5">
             <tr>
@@ -1549,7 +1695,7 @@ function BillCreatedModal({ bill, onClose, onSent }) {
 
   return (
     <div className="fixed inset-0 z-20 bg-black/60 flex items-center justify-center p-4 overflow-y-auto">
-      <div className="w-full max-w-lg bg-slate-900 border border-white/10 rounded-2xl p-6 shadow-2xl my-8">
+      <div className="w-full max-w-lg bg-slate-900 border border-white/10 rounded-2xl p-4 sm:p-6 shadow-2xl my-4 sm:my-8">
         <div className="flex items-start gap-3 mb-5">
           <div className="w-10 h-10 rounded-xl bg-emerald-400/10 text-emerald-300 flex items-center justify-center ring-1 ring-emerald-400/20 shrink-0">
             <Check size={20} />
@@ -1562,7 +1708,7 @@ function BillCreatedModal({ bill, onClose, onSent }) {
 
         <div className="bg-slate-950 border border-indigo-400/20 rounded-xl p-4 mb-4 text-center">
           <div className="text-xs font-medium tracking-wide text-slate-500 uppercase mb-2">{t.controlLabel}</div>
-          <div className="text-3xl font-mono font-semibold text-indigo-300 tracking-wider">{fmtControl(bill.control)}</div>
+          <div className="text-2xl sm:text-3xl font-mono font-semibold text-indigo-300 tracking-wider">{fmtControl(bill.control)}</div>
           <button
             onClick={() => copy(bill.control, "num")}
             className="mt-3 inline-flex items-center gap-1.5 text-xs text-slate-400 hover:text-slate-200"
@@ -1571,7 +1717,7 @@ function BillCreatedModal({ bill, onClose, onSent }) {
           </button>
         </div>
 
-        <div className="grid grid-cols-3 gap-3 mb-4 text-sm">
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-4 text-sm">
           <div>
             <div className="text-xs text-slate-500 uppercase tracking-wide mb-1">{t.customer}</div>
             <div className="text-slate-100 font-medium">{bill.customer}</div>
@@ -1697,7 +1843,7 @@ function PayView({ bills, onPay }) {
       <div className="max-w-xl space-y-5">
         <Card className="p-5">
           <Field label={t.controlLabel}>
-            <div className="flex gap-2">
+            <div className="flex flex-col sm:flex-row gap-2">
               <input
                 value={input}
                 onChange={(e) => setInput(e.target.value)}
@@ -1705,7 +1851,7 @@ function PayView({ bills, onPay }) {
                 placeholder={t.controlPlaceholder}
                 className={inputCls + " font-mono"}
               />
-              <PrimaryButton onClick={find}>
+              <PrimaryButton onClick={find} className="justify-center">
                 <Search size={15} /> {t.find}
               </PrimaryButton>
             </div>
@@ -1843,6 +1989,73 @@ function LanguageSwitcher({ lang, setLang }) {
   );
 }
 
+function SidebarBody({ view, setView, pendingCount, expiredStockCount, expiringSoonCount, onNavigate, showLang }) {
+  const { lang, setLang, s } = useLang();
+  const go = (key) => {
+    setView(key);
+    if (onNavigate) onNavigate();
+  };
+  return (
+    <>
+      <div>
+        <div className="px-5 pt-6 pb-5 border-b border-white/10 flex items-center gap-3">
+          <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-indigo-400 to-violet-600 flex items-center justify-center text-white font-bold text-sm shadow-md">
+            B
+          </div>
+          <div>
+            <div className="text-base font-semibold text-slate-50 tracking-tight leading-tight">BillManager</div>
+            <div className="text-xs text-slate-600 mt-0.5">{s.appVersion}</div>
+          </div>
+          {onNavigate && (
+            <button onClick={onNavigate} className="ml-auto text-slate-500 hover:text-slate-200">
+              <X size={20} />
+            </button>
+          )}
+        </div>
+        {showLang && (
+          <div className="px-5 pt-4">
+            <LanguageSwitcher lang={lang} setLang={setLang} />
+          </div>
+        )}
+        <nav className="px-3 py-4 space-y-1">
+          {NAV_ORDER.map((key) => {
+            const Icon = NAV_ICONS[key];
+            const active = view === key;
+            return (
+              <button
+                key={key}
+                onClick={() => go(key)}
+                className={`relative w-full flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-sm transition-all ${
+                  active ? "bg-indigo-500/20 text-indigo-200 font-medium" : "text-slate-400 hover:bg-white/5 hover:text-slate-200"
+                }`}
+              >
+                {active && <span className="absolute left-0 top-1/2 -translate-y-1/2 h-5 w-1 rounded-full bg-indigo-400" />}
+                <Icon size={16} strokeWidth={active ? 2.3 : 2} />
+                <span className="flex-1 text-left">{s.nav[key]}</span>
+                {key === "pending" && pendingCount > 0 && (
+                  <span className="bg-amber-400/20 text-amber-300 text-xs font-semibold px-1.5 py-0.5 rounded-md min-w-5 text-center">
+                    {pendingCount}
+                  </span>
+                )}
+              </button>
+            );
+          })}
+        </nav>
+      </div>
+      <div className="mx-4 mb-5 p-4 rounded-xl bg-white/5 border border-white/10 text-xs text-slate-500 space-y-2">
+        <div className="flex items-center gap-2">
+          <span className="w-1.5 h-1.5 rounded-full bg-rose-400" />
+          {s.sidebar.expired(expiredStockCount)}
+        </div>
+        <div className="flex items-center gap-2">
+          <span className="w-1.5 h-1.5 rounded-full bg-amber-400" />
+          {s.sidebar.soon(expiringSoonCount)}
+        </div>
+      </div>
+    </>
+  );
+}
+
 export default function App() {
   const [lang, setLang] = useState("sw");
   const [view, setView] = useState("create");
@@ -1852,6 +2065,7 @@ export default function App() {
   const [auditLog, setAuditLog] = useState(seedAudit);
   const [showHelp, setShowHelp] = useState(false);
   const [createdBill, setCreatedBill] = useState(null);
+  const [menuOpen, setMenuOpen] = useState(false);
 
   const s = STRINGS[lang];
 
@@ -1925,61 +2139,58 @@ export default function App() {
           html, body, #root { background-color: #020617; margin: 0; padding: 0; height: 100%; width: 100%; }
           * { box-sizing: border-box; }
         `}</style>
-        <div className="w-full min-h-screen bg-slate-950 text-slate-200 font-sans flex antialiased overflow-x-hidden">
-          {/* Sidebar */}
-          <aside className="w-64 shrink-0 border-r border-white/10 flex flex-col justify-between min-h-screen bg-slate-950">
-            <div>
-              <div className="px-5 pt-6 pb-5 border-b border-white/10 flex items-center gap-3">
-                <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-indigo-400 to-violet-600 flex items-center justify-center text-white font-bold text-sm shadow-md">
-                  B
-                </div>
-                <div>
-                  <div className="text-base font-semibold text-slate-50 tracking-tight leading-tight">BillManager</div>
-                  <div className="text-xs text-slate-600 mt-0.5">{s.appVersion}</div>
-                </div>
+        <div className="w-full min-h-screen bg-slate-950 text-slate-200 font-sans flex flex-col md:flex-row antialiased overflow-x-clip">
+          {/* Mobile top bar */}
+          <header className="md:hidden sticky top-0 z-10 bg-slate-950 border-b border-white/10 px-4 py-3 flex items-center justify-between">
+            <div className="flex items-center gap-2.5">
+              <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-indigo-400 to-violet-600 flex items-center justify-center text-white font-bold text-sm">
+                B
               </div>
-              <div className="px-5 pt-4">
-                <LanguageSwitcher lang={lang} setLang={setLang} />
-              </div>
-              <nav className="px-3 py-4 space-y-1">
-                {NAV_ORDER.map((key) => {
-                  const Icon = NAV_ICONS[key];
-                  const active = view === key;
-                  return (
-                    <button
-                      key={key}
-                      onClick={() => setView(key)}
-                      className={`relative w-full flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-sm transition-all ${
-                        active ? "bg-indigo-500/20 text-indigo-200 font-medium" : "text-slate-400 hover:bg-white/5 hover:text-slate-200"
-                      }`}
-                    >
-                      {active && <span className="absolute left-0 top-1/2 -translate-y-1/2 h-5 w-1 rounded-full bg-indigo-400" />}
-                      <Icon size={16} strokeWidth={active ? 2.3 : 2} />
-                      <span className="flex-1 text-left">{s.nav[key]}</span>
-                      {key === "pending" && pendingCount > 0 && (
-                        <span className="bg-amber-400/20 text-amber-300 text-xs font-semibold px-1.5 py-0.5 rounded-md min-w-5 text-center">
-                          {pendingCount}
-                        </span>
-                      )}
-                    </button>
-                  );
-                })}
-              </nav>
+              <div className="text-base font-semibold text-slate-50 tracking-tight">BillManager</div>
             </div>
-            <div className="mx-4 mb-5 p-4 rounded-xl bg-white/5 border border-white/10 text-xs text-slate-500 space-y-2">
-              <div className="flex items-center gap-2">
-                <span className="w-1.5 h-1.5 rounded-full bg-rose-400" />
-                {s.sidebar.expired(expiredStockCount)}
-              </div>
-              <div className="flex items-center gap-2">
-                <span className="w-1.5 h-1.5 rounded-full bg-amber-400" />
-                {s.sidebar.soon(expiringSoonCount)}
-              </div>
+            <div className="flex items-center gap-2">
+              <LanguageSwitcher lang={lang} setLang={setLang} />
+              <button
+                onClick={() => setMenuOpen(true)}
+                className="w-9 h-9 rounded-lg border border-white/10 flex items-center justify-center text-slate-300 hover:bg-white/5"
+              >
+                <Menu size={18} />
+              </button>
             </div>
+          </header>
+
+          {/* Mobile menu drawer */}
+          {menuOpen && (
+            <div className="md:hidden fixed inset-0 z-30 flex">
+              <div className="w-72 max-w-full bg-slate-950 border-r border-white/10 flex flex-col justify-between overflow-y-auto">
+                <SidebarBody
+                  view={view}
+                  setView={setView}
+                  pendingCount={pendingCount}
+                  expiredStockCount={expiredStockCount}
+                  expiringSoonCount={expiringSoonCount}
+                  onNavigate={() => setMenuOpen(false)}
+                  showLang={false}
+                />
+              </div>
+              <div className="flex-1 bg-black/60" onClick={() => setMenuOpen(false)} />
+            </div>
+          )}
+
+          {/* Desktop sidebar */}
+          <aside className="hidden md:flex w-64 shrink-0 border-r border-white/10 flex-col justify-between md:sticky md:top-0 md:h-screen md:overflow-y-auto bg-slate-950">
+            <SidebarBody
+              view={view}
+              setView={setView}
+              pendingCount={pendingCount}
+              expiredStockCount={expiredStockCount}
+              expiringSoonCount={expiringSoonCount}
+              showLang
+            />
           </aside>
 
           {/* Main */}
-          <main className="flex-1 min-w-0 px-8 py-8 max-w-6xl relative bg-slate-950">
+          <main className="flex-1 min-w-0 px-4 py-5 md:px-8 md:py-8 max-w-6xl relative bg-slate-950">
             {view === "create" && <CreateBillView inventory={inventory} onGenerate={handleGenerateBill} />}
             {view === "pending" && <PendingBillsView bills={bills} onMarkPaid={handleMarkPaid} />}
             {view === "pay" && <PayView bills={bills} onPay={handlePay} />}
@@ -2003,9 +2214,9 @@ export default function App() {
           )}
 
           {/* Help button */}
-          <div className="fixed bottom-6 right-6 z-10">
+          <div className="fixed bottom-4 right-4 md:bottom-6 md:right-6 z-10">
             {showHelp && (
-              <div className="mb-3 w-72 bg-slate-900 border border-white/10 rounded-2xl p-4 shadow-2xl text-xs text-slate-400 space-y-2.5">
+              <div className="mb-3 w-64 sm:w-72 bg-slate-900 border border-white/10 rounded-2xl p-4 shadow-2xl text-xs text-slate-400 space-y-2.5">
                 <div className="flex items-center justify-between mb-1">
                   <span className="text-slate-100 font-semibold text-sm">{s.help.title}</span>
                   <button onClick={() => setShowHelp(false)} className="text-slate-500 hover:text-slate-300">
