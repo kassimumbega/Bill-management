@@ -25,6 +25,9 @@ import {
   Search,
   Check,
   Menu,
+  LogOut,
+  Users,
+  ShieldCheck,
 } from "lucide-react";
 
 /* ----------------------------- i18n ----------------------------- */
@@ -684,6 +687,112 @@ Object.keys(BILL_TEXT).forEach((l) => {
   Object.assign(ACTION_LABELS[l], o.actions);
 });
 
+
+/* ---- Swahili wording fixes ---- */
+Object.assign(STRINGS.sw.nav, { pending: "Miamala Inayosubiri Malipo", expired: "Miamala Iliyoisha Muda", stock: "Ingiza / Toa Bidhaa" });
+Object.assign(STRINGS.sw.pending, {
+  title: "Miamala Inayosubiri Malipo",
+  subtitle: (p, o) => `${p} inasubiri · ${o} imechelewa`,
+  statPending: "Inayosubiri",
+  statOverdue: "Imechelewa",
+  subOverdue: "imepita tarehe",
+});
+Object.assign(STRINGS.sw.history, { statPaid: "Miamala Iliyolipwa" });
+Object.assign(STRINGS.sw.expired, {
+  title: "Miamala Iliyoisha Muda",
+  subtitle: "Miamala iliyopita kikomo cha muda wa kudai",
+  statExpired: "Iliyoisha Muda",
+});
+Object.assign(STRINGS.sw.stock, {
+  tabStockIn: "Ingiza Bidhaa",
+  tabStockOut: "Toa Bidhaa",
+  registerIn: "Ingiza Bidhaa",
+  registerOut: "Toa Bidhaa",
+  colBatch: "Namba ya Bachi",
+});
+Object.assign(STRINGS.sw.create, { colBatch: "Namba ya Bachi" });
+Object.assign(STRINGS.sw.transfer, { batchLabel: "Namba ya Bachi", colBatch: "Bachi" });
+Object.assign(ACTION_LABELS.sw, { stockIn: "Ingiza Bidhaa", stockOut: "Toa Bidhaa" });
+
+/* ---- Sign in (owner / seller) ---- */
+const AUTH_TEXT = {
+  sw: {
+    auth: {
+      title: "Karibu BillManager",
+      subtitle: "Ingia ili kuendelea",
+      roleLabel: "Ingia kama",
+      owner: "Mmiliki",
+      ownerDesc: "Ufikiaji wa kila kitu",
+      seller: "Muuzaji",
+      sellerDesc: "Bili, malipo na historia",
+      pin: "PIN ya Siri",
+      pinPlaceholder: "Weka PIN yako",
+      signIn: "Ingia",
+      errPin: "PIN si sahihi. Jaribu tena.",
+      customerLink: "Wewe ni mteja? Lipa bili yako",
+      back: "Rudi kwenye kuingia",
+      logout: "Toka",
+      ownerOnly: "Ukurasa huu ni wa mmiliki pekee.",
+    },
+    tabs: { create: "Bili", pending: "Miamala", pay: "Lipa", more: "Zaidi" },
+  },
+  en: {
+    auth: {
+      title: "Welcome to BillManager",
+      subtitle: "Sign in to continue",
+      roleLabel: "Sign in as",
+      owner: "Owner",
+      ownerDesc: "Full access",
+      seller: "Seller",
+      sellerDesc: "Bills, payments and history",
+      pin: "Secret PIN",
+      pinPlaceholder: "Enter your PIN",
+      signIn: "Sign in",
+      errPin: "Wrong PIN. Try again.",
+      customerLink: "Are you a customer? Pay your bill",
+      back: "Back to sign in",
+      logout: "Log out",
+      ownerOnly: "This page is for the owner only.",
+    },
+    tabs: { create: "Bill", pending: "Pending", pay: "Pay", more: "More" },
+  },
+  fr: {
+    auth: {
+      title: "Bienvenue sur BillManager",
+      subtitle: "Connectez-vous pour continuer",
+      roleLabel: "Se connecter en tant que",
+      owner: "Propriétaire",
+      ownerDesc: "Accès complet",
+      seller: "Vendeur",
+      sellerDesc: "Factures, paiements et historique",
+      pin: "Code PIN secret",
+      pinPlaceholder: "Saisissez votre PIN",
+      signIn: "Se connecter",
+      errPin: "PIN incorrect. Réessayez.",
+      customerLink: "Vous êtes client ? Payez votre facture",
+      back: "Retour à la connexion",
+      logout: "Déconnexion",
+      ownerOnly: "Cette page est réservée au propriétaire.",
+    },
+    tabs: { create: "Facture", pending: "En attente", pay: "Payer", more: "Plus" },
+  },
+};
+Object.keys(AUTH_TEXT).forEach((l) => {
+  STRINGS[l].auth = AUTH_TEXT[l].auth;
+  STRINGS[l].tabs = AUTH_TEXT[l].tabs;
+});
+
+/* Demo PINs. CHANGE THESE before real use. They live in the code, so this is
+   NOT secure login; real security needs a backend (e.g. Supabase Auth). */
+const USERS = {
+  owner: { role: "owner", pin: "1234" },
+  seller: { role: "seller", pin: "0000" },
+};
+const ROLE_ACCESS = {
+  owner: ["create", "pending", "pay", "history", "expired", "stock", "transfer"],
+  seller: ["create", "pending", "pay", "history"],
+};
+
 const LangContext = createContext({ lang: "sw", setLang: () => {}, s: STRINGS.sw });
 const useLang = () => useContext(LangContext);
 
@@ -817,12 +926,12 @@ const billTotal = (b) => b.items.reduce((s, it) => s + it.qty * it.unitPrice, 0)
 /* ----------------------------- design atoms ----------------------------- */
 
 const TONE_STYLES = {
-  pending: { bg: "bg-amber-400/10", text: "text-amber-300", ring: "ring-amber-400/20", dot: "bg-amber-400" },
-  overdue: { bg: "bg-rose-400/10", text: "text-rose-300", ring: "ring-rose-400/20", dot: "bg-rose-400" },
-  paid: { bg: "bg-emerald-400/10", text: "text-emerald-300", ring: "ring-emerald-400/20", dot: "bg-emerald-400" },
-  expired: { bg: "bg-rose-400/10", text: "text-rose-300", ring: "ring-rose-400/20", dot: "bg-rose-400" },
-  neutral: { bg: "bg-slate-400/10", text: "text-slate-300", ring: "ring-slate-400/20", dot: "bg-slate-400" },
-  info: { bg: "bg-sky-400/10", text: "text-sky-300", ring: "ring-sky-400/20", dot: "bg-sky-400" },
+  pending: { bg: "bg-amber-100", text: "text-amber-700", ring: "ring-amber-200", dot: "bg-amber-400" },
+  overdue: { bg: "bg-rose-100", text: "text-rose-700", ring: "ring-rose-200", dot: "bg-rose-400" },
+  paid: { bg: "bg-emerald-100", text: "text-emerald-700", ring: "ring-emerald-200", dot: "bg-emerald-400" },
+  expired: { bg: "bg-rose-100", text: "text-rose-700", ring: "ring-rose-200", dot: "bg-rose-400" },
+  neutral: { bg: "bg-slate-100", text: "text-slate-700", ring: "ring-slate-200", dot: "bg-slate-400" },
+  info: { bg: "bg-sky-100", text: "text-sky-700", ring: "ring-sky-200", dot: "bg-sky-400" },
 };
 
 function Badge({ children, tone = "neutral" }) {
@@ -837,11 +946,11 @@ function Badge({ children, tone = "neutral" }) {
 
 function Stat({ label, value, sub, tone = "default", icon: Icon }) {
   const toneCls =
-    tone === "danger" ? "text-rose-300" : tone === "warn" ? "text-amber-300" : tone === "accent" ? "text-indigo-300" : "text-slate-50";
+    tone === "danger" ? "text-rose-700" : tone === "warn" ? "text-amber-700" : tone === "accent" ? "text-violet-700" : "text-slate-900";
   const iconBg =
-    tone === "danger" ? "bg-rose-400/10 text-rose-300" : tone === "warn" ? "bg-amber-400/10 text-amber-300" : "bg-indigo-400/10 text-indigo-300";
+    tone === "danger" ? "bg-rose-100 text-rose-700" : tone === "warn" ? "bg-amber-100 text-amber-700" : "bg-violet-100 text-violet-700";
   return (
-    <div className="bg-slate-900 border border-white/10 rounded-2xl px-4 py-3 md:px-5 md:py-4 shadow-md hover:border-white/20 transition-colors">
+    <div className="bg-white border border-slate-200 rounded-2xl px-4 py-3 md:px-5 md:py-4 shadow-md hover:border-slate-300 transition-colors">
       <div className="flex items-center justify-between mb-3">
         <div className="text-xs font-medium tracking-wide text-slate-500 uppercase">{label}</div>
         {Icon && (
@@ -858,14 +967,14 @@ function Stat({ label, value, sub, tone = "default", icon: Icon }) {
 
 function PageHeader({ title, subtitle, icon: Icon }) {
   return (
-    <div className="mb-5 pb-4 md:mb-7 md:pb-6 border-b border-white/10 flex items-start gap-3 md:gap-4">
+    <div className="mb-5 pb-4 md:mb-7 md:pb-6 border-b border-slate-200 flex items-start gap-3 md:gap-4">
       {Icon && (
-        <div className="w-9 h-9 md:w-11 md:h-11 rounded-xl bg-indigo-500/10 text-indigo-300 flex items-center justify-center ring-1 ring-indigo-400/20 shrink-0">
+        <div className="w-9 h-9 md:w-11 md:h-11 rounded-xl bg-violet-100 text-violet-700 flex items-center justify-center ring-1 ring-violet-200 shrink-0">
           <Icon size={20} />
         </div>
       )}
       <div>
-        <h1 className="text-xl md:text-2xl font-semibold text-slate-50 tracking-tight">{title}</h1>
+        <h1 className="text-xl md:text-2xl font-semibold text-slate-900 tracking-tight">{title}</h1>
         <p className="text-sm text-slate-500 mt-1">{subtitle}</p>
       </div>
     </div>
@@ -881,11 +990,11 @@ function Th({ children, className = "" }) {
 }
 
 function Td({ children, className = "" }) {
-  return <td className={`px-4 py-3.5 text-sm text-slate-300 ${className}`}>{children}</td>;
+  return <td className={`px-4 py-3.5 text-sm text-slate-700 ${className}`}>{children}</td>;
 }
 
 function Card({ children, className = "" }) {
-  return <div className={`bg-slate-900 border border-white/10 rounded-2xl ${className}`}>{children}</div>;
+  return <div className={`bg-white border border-slate-200 rounded-2xl ${className}`}>{children}</div>;
 }
 
 function Field({ label, children }) {
@@ -898,13 +1007,13 @@ function Field({ label, children }) {
 }
 
 const inputCls =
-  "w-full bg-slate-950 border border-white/10 rounded-lg px-3.5 py-2.5 text-sm text-slate-200 placeholder-slate-600 outline-none focus:border-indigo-400/50 focus:ring-2 focus:ring-indigo-400/10 transition-colors";
+  "w-full bg-slate-50 border border-slate-200 rounded-lg px-3.5 py-2.5 text-sm text-slate-800 placeholder-slate-400 outline-none focus:border-violet-400 focus:ring-2 focus:ring-violet-200 transition-colors";
 
 function PrimaryButton({ children, onClick, className = "" }) {
   return (
     <button
       onClick={onClick}
-      className={`inline-flex items-center gap-2 bg-indigo-500 hover:bg-indigo-400 text-white text-sm font-medium px-5 py-2.5 rounded-xl shadow-lg transition-all active:scale-95 ${className}`}
+      className={`inline-flex items-center gap-2 bg-violet-600 hover:bg-violet-500 text-white text-sm font-medium px-5 py-2.5 rounded-xl shadow-lg transition-all active:scale-95 ${className}`}
     >
       {children}
     </button>
@@ -915,7 +1024,7 @@ function GhostButton({ children, onClick, className = "" }) {
   return (
     <button
       onClick={onClick}
-      className={`inline-flex items-center gap-1.5 text-xs font-medium text-slate-300 border border-white/10 hover:border-white/25 hover:bg-white/5 rounded-lg px-3 py-2 transition-colors ${className}`}
+      className={`inline-flex items-center gap-1.5 text-xs font-medium text-slate-700 border border-slate-200 hover:border-slate-300 hover:bg-slate-50 rounded-lg px-3 py-2 transition-colors ${className}`}
     >
       {children}
     </button>
@@ -983,18 +1092,18 @@ function CreateBillView({ inventory, onGenerate }) {
 
       <Card className="p-5 mb-6">
         <div className="flex items-center gap-2 mb-4">
-          <Sparkles size={14} className="text-amber-300" />
-          <div className="text-xs font-medium tracking-wide text-slate-400 uppercase">{t.suggestTitle}</div>
+          <Sparkles size={14} className="text-amber-700" />
+          <div className="text-xs font-medium tracking-wide text-slate-500 uppercase">{t.suggestTitle}</div>
         </div>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
           {oldestStock.map((it) => (
             <button
               key={it.id}
               onClick={() => applySuggestion(it)}
-              className="text-left bg-amber-400/5 hover:bg-amber-400/10 border border-amber-400/20 hover:border-amber-400/30 rounded-xl px-3.5 py-2.5 text-xs transition-all"
+              className="text-left bg-amber-50 hover:bg-amber-100 border border-amber-200 hover:border-amber-300 rounded-xl px-3.5 py-2.5 text-xs transition-all"
             >
-              <span className="font-semibold text-amber-200">{it.product}</span>
-              <span className="text-amber-400/60"> · {it.batch} · {t.received} {fmtDate(it.received, lang)}</span>
+              <span className="font-semibold text-amber-800">{it.product}</span>
+              <span className="text-amber-700/70"> · {it.batch} · {t.received} {fmtDate(it.received, lang)}</span>
             </button>
           ))}
         </div>
@@ -1021,7 +1130,7 @@ function CreateBillView({ inventory, onGenerate }) {
 
       <Card className="hidden md:block overflow-hidden mb-2">
         <table className="w-full">
-          <thead className="bg-white/5">
+          <thead className="bg-slate-100">
             <tr>
               <Th>{t.colProduct}</Th>
               <Th>{t.colBatch}</Th>
@@ -1034,13 +1143,13 @@ function CreateBillView({ inventory, onGenerate }) {
           </thead>
           <tbody>
             {rows.map((r) => (
-              <tr key={r.rid} className="border-t border-white/10">
+              <tr key={r.rid} className="border-t border-slate-200">
                 <Td>
                   <input
                     value={r.product}
                     onChange={(e) => updateRow(r.rid, { product: e.target.value })}
                     placeholder={t.productPlaceholder}
-                    className="w-full bg-transparent text-slate-200 placeholder-slate-600 outline-none"
+                    className="w-full bg-transparent text-slate-800 placeholder-slate-400 outline-none"
                   />
                 </Td>
                 <Td>
@@ -1056,7 +1165,7 @@ function CreateBillView({ inventory, onGenerate }) {
                     min="1"
                     value={r.qty}
                     onChange={(e) => updateRow(r.rid, { qty: e.target.value })}
-                    className="w-16 bg-transparent text-slate-200 outline-none"
+                    className="w-16 bg-transparent text-slate-800 outline-none"
                   />
                 </Td>
                 <Td>
@@ -1065,7 +1174,7 @@ function CreateBillView({ inventory, onGenerate }) {
                     min="0"
                     value={r.unitPrice}
                     onChange={(e) => updateRow(r.rid, { unitPrice: e.target.value })}
-                    className="w-24 bg-transparent text-slate-200 outline-none"
+                    className="w-24 bg-transparent text-slate-800 outline-none"
                   />
                 </Td>
                 <Td>
@@ -1076,11 +1185,11 @@ function CreateBillView({ inventory, onGenerate }) {
                     className="bg-transparent text-slate-500 outline-none text-xs"
                   />
                 </Td>
-                <Td className="text-right font-semibold text-slate-100">
+                <Td className="text-right font-semibold text-slate-900">
                   {fmtTZS((Number(r.qty) || 0) * (Number(r.unitPrice) || 0))}
                 </Td>
                 <Td>
-                  <button onClick={() => removeRow(r.rid)} className="text-slate-600 hover:text-rose-400 transition-colors">
+                  <button onClick={() => removeRow(r.rid)} className="text-slate-400 hover:text-rose-600 transition-colors">
                     <Trash2 size={14} />
                   </button>
                 </Td>
@@ -1095,7 +1204,7 @@ function CreateBillView({ inventory, onGenerate }) {
           <Card key={r.rid} className="p-4 space-y-3">
             <div className="flex items-center justify-between">
               <span className="text-xs text-slate-500 uppercase tracking-wide">#{idx + 1}</span>
-              <button onClick={() => removeRow(r.rid)} className="text-slate-600 hover:text-rose-400 transition-colors">
+              <button onClick={() => removeRow(r.rid)} className="text-slate-400 hover:text-rose-600 transition-colors">
                 <Trash2 size={15} />
               </button>
             </div>
@@ -1118,19 +1227,19 @@ function CreateBillView({ inventory, onGenerate }) {
                 <input type="date" value={r.expiry} onChange={(e) => updateRow(r.rid, { expiry: e.target.value })} className={inputCls} />
               </Field>
             </div>
-            <div className="flex items-center justify-between pt-3 border-t border-white/10">
+            <div className="flex items-center justify-between pt-3 border-t border-slate-200">
               <span className="text-xs text-slate-500 uppercase tracking-wide">{t.colSubtotal}</span>
-              <span className="text-slate-50 font-semibold">{fmtTZS((Number(r.qty) || 0) * (Number(r.unitPrice) || 0))}</span>
+              <span className="text-slate-900 font-semibold">{fmtTZS((Number(r.qty) || 0) * (Number(r.unitPrice) || 0))}</span>
             </div>
           </Card>
         ))}
       </div>
 
-      {error && <div className="text-xs text-rose-400 mb-4 mt-2">{error}</div>}
+      {error && <div className="text-xs text-rose-600 mb-4 mt-2">{error}</div>}
 
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mt-7">
         <div className="text-slate-500 text-sm">
-          {t.total} <span className="block text-3xl font-semibold text-slate-50 tracking-tight mt-0.5">{fmtTZS(total)}</span>
+          {t.total} <span className="block text-3xl font-semibold text-slate-900 tracking-tight mt-0.5">{fmtTZS(total)}</span>
         </div>
         <PrimaryButton onClick={handleGenerate} className="w-full sm:w-auto justify-center">
           {t.generate} <ChevronRight size={15} />
@@ -1155,7 +1264,7 @@ function BillsTable({ bills, showMarkPaid, onMarkPaid, statusOverride }) {
           <Card key={b.id} className="p-4">
             <div className="flex items-start justify-between gap-3 mb-3">
               <div className="min-w-0">
-                <div className="text-slate-100 font-medium truncate">{b.customer}</div>
+                <div className="text-slate-900 font-medium truncate">{b.customer}</div>
                 <div className="text-xs text-slate-500">{b.phone}</div>
               </div>
               <Badge tone={tone}>{st[tone]}</Badge>
@@ -1163,21 +1272,21 @@ function BillsTable({ bills, showMarkPaid, onMarkPaid, statusOverride }) {
             <div className="grid grid-cols-2 gap-3 mb-3">
               <div>
                 <div className="text-xs text-slate-500 uppercase tracking-wide mb-0.5">{t.colTotal}</div>
-                <div className="text-slate-50 font-semibold">{fmtTZS(billTotal(b))}</div>
+                <div className="text-slate-900 font-semibold">{fmtTZS(billTotal(b))}</div>
               </div>
               <div>
                 <div className="text-xs text-slate-500 uppercase tracking-wide mb-0.5">{t.colDuePaid}</div>
-                <div className="text-slate-300 text-sm">{fmtDate(b.paid || b.due, lang)}</div>
+                <div className="text-slate-700 text-sm">{fmtDate(b.paid || b.due, lang)}</div>
               </div>
               <div className="col-span-2">
                 <div className="text-xs text-slate-500 uppercase tracking-wide mb-0.5">{t.colControl}</div>
-                <div className="font-mono text-indigo-300 text-sm">{fmtControl(b.control)}</div>
+                <div className="font-mono text-violet-700 text-sm">{fmtControl(b.control)}</div>
               </div>
             </div>
-            <div className="flex items-center justify-between gap-2 pt-3 border-t border-white/10">
-              <span className="text-xs text-slate-600 font-mono">{b.invoice} · {b.items.length} {s.common.items}</span>
+            <div className="flex items-center justify-between gap-2 pt-3 border-t border-slate-200">
+              <span className="text-xs text-slate-400 font-mono">{b.invoice} · {b.items.length} {s.common.items}</span>
               {showMarkPaid && (
-                <GhostButton onClick={() => onMarkPaid(b.id)} className="hover:!border-emerald-400/50 hover:!text-emerald-300">
+                <GhostButton onClick={() => onMarkPaid(b.id)} className="hover:!border-emerald-400 hover:!text-emerald-700">
                   <CheckCircle2 size={13} /> {t.markPaid}
                 </GhostButton>
               )}
@@ -1185,7 +1294,7 @@ function BillsTable({ bills, showMarkPaid, onMarkPaid, statusOverride }) {
           </Card>
         );
       })}
-      {bills.length === 0 && <div className="text-center text-sm text-slate-600 py-10">{s.common.noRecords}</div>}
+      {bills.length === 0 && <div className="text-center text-sm text-slate-400 py-10">{s.common.noRecords}</div>}
     </div>
   );
   return (
@@ -1193,7 +1302,7 @@ function BillsTable({ bills, showMarkPaid, onMarkPaid, statusOverride }) {
     {mobileList}
     <Card className="hidden md:block overflow-x-auto">
       <table className="w-full" style={{ minWidth: "980px" }}>
-        <thead className="bg-white/5">
+        <thead className="bg-slate-100">
           <tr>
             <Th>{t.colTransaction}</Th>
             <Th>{t.colControl}</Th>
@@ -1214,13 +1323,13 @@ function BillsTable({ bills, showMarkPaid, onMarkPaid, statusOverride }) {
             const tone = statusOverride || (b.status === "paid" ? "paid" : b.status === "expired" ? "expired" : isOverdue ? "overdue" : "pending");
             const label = st[tone];
             return (
-              <tr key={b.id} className="border-t border-white/10 hover:bg-white/5 transition-colors">
-                <Td className="text-indigo-300 font-mono font-medium text-xs">{b.invoice}</Td>
-                <Td className="text-slate-300 font-mono text-xs">{fmtControl(b.control)}</Td>
-                <Td className="text-slate-100 font-medium">{b.customer}</Td>
+              <tr key={b.id} className="border-t border-slate-200 hover:bg-slate-50 transition-colors">
+                <Td className="text-violet-700 font-mono font-medium text-xs">{b.invoice}</Td>
+                <Td className="text-slate-700 font-mono text-xs">{fmtControl(b.control)}</Td>
+                <Td className="text-slate-900 font-medium">{b.customer}</Td>
                 <Td className="text-slate-500">{b.phone}</Td>
                 <Td>{b.items.length} {s.common.items}</Td>
-                <Td className="font-semibold text-slate-100">{fmtTZS(total)}</Td>
+                <Td className="font-semibold text-slate-900">{fmtTZS(total)}</Td>
                 <Td className="text-slate-500">{fmtDate(b.created, lang)}</Td>
                 <Td className="text-slate-500">{fmtDate(b.paid || b.due, lang)}</Td>
                 <Td>
@@ -1228,7 +1337,7 @@ function BillsTable({ bills, showMarkPaid, onMarkPaid, statusOverride }) {
                 </Td>
                 {showMarkPaid && (
                   <Td>
-                    <GhostButton onClick={() => onMarkPaid(b.id)} className="hover:!border-emerald-400/50 hover:!text-emerald-300">
+                    <GhostButton onClick={() => onMarkPaid(b.id)} className="hover:!border-emerald-400 hover:!text-emerald-700">
                       <CheckCircle2 size={13} /> {t.markPaid}
                     </GhostButton>
                   </Td>
@@ -1238,7 +1347,7 @@ function BillsTable({ bills, showMarkPaid, onMarkPaid, statusOverride }) {
           })}
           {bills.length === 0 && (
             <tr>
-              <td colSpan={10} className="text-center text-sm text-slate-600 py-14">
+              <td colSpan={10} className="text-center text-sm text-slate-400 py-14">
                 {s.common.noRecords}
               </td>
             </tr>
@@ -1261,11 +1370,23 @@ function PendingBillsView({ bills, onMarkPaid }) {
   return (
     <div>
       <PageHeader title={t.title} subtitle={t.subtitle(pending.length, overdue.length)} icon={RotateCw} />
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
-        <Stat label={t.statPending} value={pending.length} icon={Receipt} />
-        <Stat label={t.statOverdue} value={overdue.length} sub={t.subOverdue} tone={overdue.length ? "danger" : "default"} icon={AlertTriangle} />
-        <Stat label={t.statTotalDue} value={fmtTZS(totalDue)} icon={Wallet} tone="accent" />
-        <Stat label={t.statOldest} value={`${oldest} ${s.common.daysAgoUnit}`} sub={t.subAgo} icon={Clock} />
+      <div className="rounded-3xl bg-gradient-to-br from-violet-600 to-purple-800 text-white p-5 md:p-6 mb-6 shadow-lg">
+        <div className="text-xs uppercase tracking-wide text-violet-200 mb-1">{t.statTotalDue}</div>
+        <div className="text-3xl md:text-4xl font-semibold tracking-tight mb-5 break-words">{fmtTZS(totalDue)}</div>
+        <div className="grid grid-cols-3 gap-3 pt-4 border-t border-violet-400">
+          <div>
+            <div className="text-xs text-violet-200">{t.statPending}</div>
+            <div className="text-lg font-semibold">{pending.length}</div>
+          </div>
+          <div>
+            <div className="text-xs text-violet-200">{t.statOverdue}</div>
+            <div className="text-lg font-semibold">{overdue.length}</div>
+          </div>
+          <div>
+            <div className="text-xs text-violet-200">{t.statOldest}</div>
+            <div className="text-lg font-semibold">{oldest} {s.common.daysAgoUnit}</div>
+          </div>
+        </div>
       </div>
       <BillsTable bills={pending} showMarkPaid onMarkPaid={onMarkPaid} />
     </div>
@@ -1273,7 +1394,7 @@ function PendingBillsView({ bills, onMarkPaid }) {
 }
 
 function PaymentHistoryView({ bills }) {
-  const { s } = useLang();
+  const { s, user } = useLang();
   const t = s.history;
   const paid = bills.filter((b) => b.status === "paid");
   const totalCollected = paid.reduce((s2, b) => s2 + billTotal(b), 0);
@@ -1282,11 +1403,13 @@ function PaymentHistoryView({ bills }) {
   return (
     <div>
       <PageHeader title={t.title} subtitle={t.subtitle(paid.length)} icon={CheckCircle2} />
-      <div className="grid grid-cols-2 md:grid-cols-3 gap-4 mb-6">
-        <Stat label={t.statPaid} value={paid.length} icon={CheckCircle2} />
-        <Stat label={t.statCollected} value={fmtTZS(totalCollected)} icon={Wallet} tone="accent" />
-        <Stat label={t.statAvg} value={fmtTZS(avg)} icon={Receipt} />
-      </div>
+      {user && user.role === "owner" && (
+        <div className="grid grid-cols-2 md:grid-cols-3 gap-4 mb-6">
+          <Stat label={t.statPaid} value={paid.length} icon={CheckCircle2} />
+          <Stat label={t.statCollected} value={fmtTZS(totalCollected)} icon={Wallet} tone="accent" />
+          <Stat label={t.statAvg} value={fmtTZS(avg)} icon={Receipt} />
+        </div>
+      )}
       <BillsTable bills={paid} statusOverride="paid" />
     </div>
   );
@@ -1373,13 +1496,13 @@ function StockManagementView({ inventory, onStockChange, auditLog, addAudit }) {
         <Stat label={t.statExpiredStock} value={expiredStock.length} tone={expiredStock.length ? "danger" : "default"} icon={AlertTriangle} />
       </div>
 
-      <div className="flex gap-1 mb-6 bg-white/5 p-1 rounded-xl w-fit max-w-full overflow-x-auto">
+      <div className="flex gap-1 mb-6 bg-slate-100 p-1 rounded-xl w-fit max-w-full overflow-x-auto">
         {tabs.map((tb) => (
           <button
             key={tb.key}
             onClick={() => setTab(tb.key)}
             className={`text-xs font-medium px-3.5 py-2 rounded-lg transition-colors whitespace-nowrap shrink-0 ${
-              tab === tb.key ? "bg-indigo-500 text-white shadow-sm" : "text-slate-400 hover:text-slate-200"
+              tab === tb.key ? "bg-violet-600 text-white shadow-sm" : "text-slate-500 hover:text-slate-800"
             }`}
           >
             {tb.label}
@@ -1397,39 +1520,39 @@ function StockManagementView({ inventory, onStockChange, auditLog, addAudit }) {
               <Card key={it.id} className="p-4">
                 <div className="flex items-start justify-between gap-3 mb-3">
                   <div className="min-w-0">
-                    <div className="text-slate-100 font-medium">{it.product}</div>
+                    <div className="text-slate-900 font-medium">{it.product}</div>
                     <div className="text-xs text-slate-500 font-mono">{it.batch}</div>
                   </div>
-                  <div className={`text-lg font-semibold ${it.qty === 0 ? "text-rose-300" : "text-emerald-300"}`}>{it.qty}</div>
+                  <div className={`text-lg font-semibold ${it.qty === 0 ? "text-rose-700" : "text-emerald-700"}`}>{it.qty}</div>
                 </div>
                 <div className="grid grid-cols-2 gap-3 text-sm">
                   <div>
                     <div className="text-xs text-slate-500 uppercase tracking-wide mb-0.5">{t.colUnitPrice}</div>
-                    <div className="text-slate-300">{fmtTZS(it.unitPrice)}</div>
+                    <div className="text-slate-700">{fmtTZS(it.unitPrice)}</div>
                   </div>
                   <div>
                     <div className="text-xs text-slate-500 uppercase tracking-wide mb-0.5">{t.colExpiry}</div>
-                    <div className={expDays < 0 ? "text-rose-300" : expDays <= 90 ? "text-amber-300" : "text-slate-300"}>{it.expiry.slice(0, 7)}</div>
+                    <div className={expDays < 0 ? "text-rose-700" : expDays <= 90 ? "text-amber-700" : "text-slate-700"}>{it.expiry.slice(0, 7)}</div>
                   </div>
                   <div>
                     <div className="text-xs text-slate-500 uppercase tracking-wide mb-0.5">{t.colReceived}</div>
-                    <div className="text-slate-300">{fmtDate(it.received, lang)}</div>
+                    <div className="text-slate-700">{fmtDate(it.received, lang)}</div>
                   </div>
                   <div>
                     <div className="text-xs text-slate-500 uppercase tracking-wide mb-0.5">{t.colAge}</div>
-                    <div className={it.id === oldestId ? "text-amber-300 font-medium" : "text-slate-300"}>
+                    <div className={it.id === oldestId ? "text-amber-700 font-medium" : "text-slate-700"}>
                       {it.id === oldestId ? s.common.oldest : s.common.daysAgo(age)}
                     </div>
                   </div>
                 </div>
-                <div className="text-xs text-slate-600 mt-3 pt-3 border-t border-white/10">{it.supplier}</div>
+                <div className="text-xs text-slate-400 mt-3 pt-3 border-t border-slate-200">{it.supplier}</div>
               </Card>
             );
           })}
         </div>
         <Card className="hidden md:block overflow-x-auto">
           <table className="w-full" style={{ minWidth: "820px" }}>
-            <thead className="bg-white/5">
+            <thead className="bg-slate-100">
               <tr>
                 <Th>{t.colProduct}</Th>
                 <Th>{t.colBatch}</Th>
@@ -1446,17 +1569,17 @@ function StockManagementView({ inventory, onStockChange, auditLog, addAudit }) {
                 const age = daysBetween(TODAY, it.received);
                 const expDays = daysBetween(it.expiry, TODAY);
                 return (
-                  <tr key={it.id} className="border-t border-white/10 hover:bg-white/5 transition-colors">
-                    <Td className="text-slate-100 font-medium">{it.product}</Td>
+                  <tr key={it.id} className="border-t border-slate-200 hover:bg-slate-50 transition-colors">
+                    <Td className="text-slate-900 font-medium">{it.product}</Td>
                     <Td className="text-slate-500 font-mono text-xs">{it.batch}</Td>
-                    <Td className={it.qty === 0 ? "text-rose-300 font-medium" : "text-emerald-300 font-medium"}>{it.qty}</Td>
+                    <Td className={it.qty === 0 ? "text-rose-700 font-medium" : "text-emerald-700 font-medium"}>{it.qty}</Td>
                     <Td>{fmtTZS(it.unitPrice)}</Td>
                     <Td className="text-slate-500">{fmtDate(it.received, lang)}</Td>
-                    <Td className={expDays < 0 ? "text-rose-300" : expDays <= 90 ? "text-amber-300" : "text-slate-400"}>
+                    <Td className={expDays < 0 ? "text-rose-700" : expDays <= 90 ? "text-amber-700" : "text-slate-500"}>
                       {it.expiry.slice(0, 7)}
                     </Td>
                     <Td className="text-slate-500">{it.supplier}</Td>
-                    <Td className={it.id === oldestId ? "text-amber-300 font-medium" : "text-slate-500"}>
+                    <Td className={it.id === oldestId ? "text-amber-700 font-medium" : "text-slate-500"}>
                       {it.id === oldestId ? s.common.oldest : s.common.daysAgo(age)}
                     </Td>
                   </tr>
@@ -1484,7 +1607,7 @@ function StockManagementView({ inventory, onStockChange, auditLog, addAudit }) {
           <Field label={t.supplierLabel}>
             <input value={inSupplier} onChange={(e) => setInSupplier(e.target.value)} placeholder={t.supplierPlaceholder} className={inputCls} />
           </Field>
-          {msg && <div className="text-xs text-rose-400">{msg}</div>}
+          {msg && <div className="text-xs text-rose-600">{msg}</div>}
           <PrimaryButton onClick={handleStockIn}>
             <PackagePlus size={15} /> {t.registerIn}
           </PrimaryButton>
@@ -1499,7 +1622,7 @@ function StockManagementView({ inventory, onStockChange, auditLog, addAudit }) {
           <Field label={t.qtyOut}>
             <input type="number" min="1" value={outQty} onChange={(e) => setOutQty(e.target.value)} className={inputCls} />
           </Field>
-          {msg && <div className="text-xs text-rose-400">{msg}</div>}
+          {msg && <div className="text-xs text-rose-600">{msg}</div>}
           <PrimaryButton onClick={handleStockOut}>
             <PackageMinus size={15} /> {t.registerOut}
           </PrimaryButton>
@@ -1507,15 +1630,15 @@ function StockManagementView({ inventory, onStockChange, auditLog, addAudit }) {
       )}
 
       {tab === "audit" && (
-        <Card className="divide-y divide-white/10">
+        <Card className="divide-y divide-slate-200">
           {auditLog.map((a) => (
             <div key={a.id} className="px-4 md:px-5 py-3.5 flex flex-col items-start sm:flex-row gap-1.5 sm:gap-4">
-              <span className="text-xs text-slate-600 w-24 shrink-0 pt-0.5 font-mono">{fmtDate(a.date, lang)}</span>
+              <span className="text-xs text-slate-400 w-24 shrink-0 pt-0.5 font-mono">{fmtDate(a.date, lang)}</span>
               <Badge tone="info">{ACTION_LABELS[lang][a.action] || a.action}</Badge>
-              <span className="text-sm text-slate-300">{a.detail}</span>
+              <span className="text-sm text-slate-700">{a.detail}</span>
             </div>
           ))}
-          {auditLog.length === 0 && <div className="text-center text-sm text-slate-600 py-14">{t.noAudit}</div>}
+          {auditLog.length === 0 && <div className="text-center text-sm text-slate-400 py-14">{t.noAudit}</div>}
         </Card>
       )}
     </div>
@@ -1589,7 +1712,7 @@ function TransferView({ inventory, transfers, onSubmitTransfer }) {
               </select>
             </Field>
           </div>
-          {error && <div className="text-xs text-rose-400 mb-3">{error}</div>}
+          {error && <div className="text-xs text-rose-600 mb-3">{error}</div>}
           <PrimaryButton onClick={handleSubmit}>
             {t.submit} <ChevronRight size={15} />
           </PrimaryButton>
@@ -1600,11 +1723,11 @@ function TransferView({ inventory, transfers, onSubmitTransfer }) {
           <div className="space-y-2.5">
             {summary.map((sm) => (
               <Card key={sm.loc} className="px-4 py-3.5 flex items-center justify-between">
-                <span className="text-sm text-slate-200 font-medium">{locLabels[sm.loc]}</span>
+                <span className="text-sm text-slate-800 font-medium">{locLabels[sm.loc]}</span>
                 <span className="text-xs">
-                  <span className="text-emerald-300">{sm.rcvd} {t.received}</span>
-                  <span className="text-slate-700 mx-2">·</span>
-                  <span className="text-indigo-300">{sm.sent} {t.sent}</span>
+                  <span className="text-emerald-700">{sm.rcvd} {t.received}</span>
+                  <span className="text-slate-300 mx-2">·</span>
+                  <span className="text-violet-700">{sm.sent} {t.sent}</span>
                 </span>
               </Card>
             ))}
@@ -1618,18 +1741,18 @@ function TransferView({ inventory, transfers, onSubmitTransfer }) {
           <Card key={tr.id} className="p-4">
             <div className="flex items-start justify-between gap-3 mb-3">
               <div className="min-w-0">
-                <div className="text-slate-100 font-medium">{tr.product}</div>
+                <div className="text-slate-900 font-medium">{tr.product}</div>
                 <div className="text-xs text-slate-500 font-mono">{tr.id} · {tr.batch}</div>
               </div>
               <Badge tone={tr.status === "completed" ? "paid" : "pending"}>
                 {tr.status === "completed" ? st.transferCompleted : st.transferPending}
               </Badge>
             </div>
-            <div className="text-sm text-slate-300 mb-2">
-              {locLabels[tr.from]} <span className="text-slate-600">→</span> {locLabels[tr.to]}
+            <div className="text-sm text-slate-700 mb-2">
+              {locLabels[tr.from]} <span className="text-slate-400">→</span> {locLabels[tr.to]}
             </div>
             <div className="flex items-center justify-between text-xs text-slate-500">
-              <span>{t.colQty}: <span className="text-slate-200 font-semibold">{tr.qty}</span></span>
+              <span>{t.colQty}: <span className="text-slate-800 font-semibold">{tr.qty}</span></span>
               <span>{fmtDate(tr.date, lang)}</span>
             </div>
           </Card>
@@ -1637,7 +1760,7 @@ function TransferView({ inventory, transfers, onSubmitTransfer }) {
       </div>
       <Card className="hidden md:block overflow-x-auto">
         <table className="w-full" style={{ minWidth: "760px" }}>
-          <thead className="bg-white/5">
+          <thead className="bg-slate-100">
             <tr>
               <Th>{t.colId}</Th>
               <Th>{t.colProduct}</Th>
@@ -1651,9 +1774,9 @@ function TransferView({ inventory, transfers, onSubmitTransfer }) {
           </thead>
           <tbody>
             {transfers.map((tr) => (
-              <tr key={tr.id} className="border-t border-white/10 hover:bg-white/5 transition-colors">
-                <Td className="text-indigo-300 font-mono font-medium text-xs">{tr.id}</Td>
-                <Td className="text-slate-100">{tr.product}</Td>
+              <tr key={tr.id} className="border-t border-slate-200 hover:bg-slate-50 transition-colors">
+                <Td className="text-violet-700 font-mono font-medium text-xs">{tr.id}</Td>
+                <Td className="text-slate-900">{tr.product}</Td>
                 <Td className="text-slate-500 font-mono text-xs">{tr.batch}</Td>
                 <Td>{tr.qty}</Td>
                 <Td className="text-slate-500">{locLabels[tr.from]}</Td>
@@ -1695,23 +1818,23 @@ function BillCreatedModal({ bill, onClose, onSent }) {
 
   return (
     <div className="fixed inset-0 z-20 bg-black/60 flex items-center justify-center p-4 overflow-y-auto">
-      <div className="w-full max-w-lg bg-slate-900 border border-white/10 rounded-2xl p-4 sm:p-6 shadow-2xl my-4 sm:my-8">
+      <div className="w-full max-w-lg bg-white border border-slate-200 rounded-2xl p-4 sm:p-6 shadow-2xl my-4 sm:my-8">
         <div className="flex items-start gap-3 mb-5">
-          <div className="w-10 h-10 rounded-xl bg-emerald-400/10 text-emerald-300 flex items-center justify-center ring-1 ring-emerald-400/20 shrink-0">
+          <div className="w-10 h-10 rounded-xl bg-emerald-100 text-emerald-700 flex items-center justify-center ring-1 ring-emerald-200 shrink-0">
             <Check size={20} />
           </div>
           <div>
-            <h2 className="text-xl font-semibold text-slate-50">{t.createdTitle}</h2>
+            <h2 className="text-xl font-semibold text-slate-900">{t.createdTitle}</h2>
             <p className="text-sm text-slate-500 mt-0.5">{t.createdSub}</p>
           </div>
         </div>
 
-        <div className="bg-slate-950 border border-indigo-400/20 rounded-xl p-4 mb-4 text-center">
+        <div className="bg-slate-50 border border-violet-200 rounded-xl p-4 mb-4 text-center">
           <div className="text-xs font-medium tracking-wide text-slate-500 uppercase mb-2">{t.controlLabel}</div>
-          <div className="text-2xl sm:text-3xl font-mono font-semibold text-indigo-300 tracking-wider">{fmtControl(bill.control)}</div>
+          <div className="text-2xl sm:text-3xl font-mono font-semibold text-violet-700 tracking-wider">{fmtControl(bill.control)}</div>
           <button
             onClick={() => copy(bill.control, "num")}
-            className="mt-3 inline-flex items-center gap-1.5 text-xs text-slate-400 hover:text-slate-200"
+            className="mt-3 inline-flex items-center gap-1.5 text-xs text-slate-500 hover:text-slate-800"
           >
             {copied === "num" ? <Check size={13} /> : <Copy size={13} />} {copied === "num" ? t.copied : t.copyNumber}
           </button>
@@ -1720,29 +1843,29 @@ function BillCreatedModal({ bill, onClose, onSent }) {
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-4 text-sm">
           <div>
             <div className="text-xs text-slate-500 uppercase tracking-wide mb-1">{t.customer}</div>
-            <div className="text-slate-100 font-medium">{bill.customer}</div>
+            <div className="text-slate-900 font-medium">{bill.customer}</div>
             <div className="text-xs text-slate-500">{bill.phone}</div>
           </div>
           <div>
             <div className="text-xs text-slate-500 uppercase tracking-wide mb-1">{t.amount}</div>
-            <div className="text-slate-100 font-semibold">{fmtTZS(total)}</div>
+            <div className="text-slate-900 font-semibold">{fmtTZS(total)}</div>
           </div>
           <div>
             <div className="text-xs text-slate-500 uppercase tracking-wide mb-1">{t.due}</div>
-            <div className="text-slate-100">{fmtDate(bill.due, lang)}</div>
+            <div className="text-slate-900">{fmtDate(bill.due, lang)}</div>
           </div>
         </div>
 
         <div className="mb-4">
           <div className="text-xs font-medium tracking-wide text-slate-500 uppercase mb-2">{t.messageLabel}</div>
-          <div className="bg-slate-950 border border-white/10 rounded-lg p-3 text-xs text-slate-400 leading-relaxed">{message}</div>
+          <div className="bg-slate-50 border border-slate-200 rounded-lg p-3 text-xs text-slate-500 leading-relaxed">{message}</div>
         </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 mb-3">
           <a
             href={`sms:${bill.phone.replace(/\s/g, "")}?body=${enc}`}
             onClick={() => onSent(bill.id)}
-            className="inline-flex items-center justify-center gap-2 bg-indigo-500 hover:bg-indigo-400 text-white text-sm font-medium px-4 py-2.5 rounded-xl transition-colors"
+            className="inline-flex items-center justify-center gap-2 bg-violet-600 hover:bg-violet-500 text-white text-sm font-medium px-4 py-2.5 rounded-xl transition-colors"
           >
             <Send size={15} /> {t.sendSms}
           </a>
@@ -1751,7 +1874,7 @@ function BillCreatedModal({ bill, onClose, onSent }) {
             target="_blank"
             rel="noreferrer"
             onClick={() => onSent(bill.id)}
-            className="inline-flex items-center justify-center gap-2 bg-emerald-500 hover:bg-emerald-400 text-white text-sm font-medium px-4 py-2.5 rounded-xl transition-colors"
+            className="inline-flex items-center justify-center gap-2 bg-emerald-600 hover:bg-emerald-500 text-white text-sm font-medium px-4 py-2.5 rounded-xl transition-colors"
           >
             <MessageCircle size={15} /> {t.sendWhatsapp}
           </a>
@@ -1763,7 +1886,7 @@ function BillCreatedModal({ bill, onClose, onSent }) {
           {bill.sent && <Badge tone="paid">{t.sent}</Badge>}
         </div>
 
-        <p className="text-xs text-slate-600 mb-5">{t.note}</p>
+        <p className="text-xs text-slate-400 mb-5">{t.note}</p>
 
         <PrimaryButton onClick={onClose} className="w-full justify-center">
           {t.done}
@@ -1838,7 +1961,7 @@ function PayView({ bills, onPay }) {
     <div>
       <PageHeader title={t.title} subtitle={t.subtitle} icon={CreditCard} />
 
-      <div className="mb-6 bg-amber-400/10 border border-amber-400/20 rounded-xl px-4 py-3 text-xs text-amber-200">{t.demo}</div>
+      <div className="mb-6 bg-amber-100 border border-amber-200 rounded-xl px-4 py-3 text-xs text-amber-800">{t.demo}</div>
 
       <div className="max-w-xl space-y-5">
         <Card className="p-5">
@@ -1856,7 +1979,7 @@ function PayView({ bills, onPay }) {
               </PrimaryButton>
             </div>
           </Field>
-          {notFound && <div className="text-xs text-rose-400 mt-3">{t.notFound}</div>}
+          {notFound && <div className="text-xs text-rose-600 mt-3">{t.notFound}</div>}
         </Card>
 
         {bill && step !== "done" && (
@@ -1868,30 +1991,30 @@ function PayView({ bills, onPay }) {
             <div className="grid grid-cols-2 gap-4 text-sm mb-4">
               <div>
                 <div className="text-xs text-slate-500 uppercase tracking-wide mb-1">{t.customer}</div>
-                <div className="text-slate-100 font-medium">{bill.customer}</div>
+                <div className="text-slate-900 font-medium">{bill.customer}</div>
               </div>
               <div>
                 <div className="text-xs text-slate-500 uppercase tracking-wide mb-1">{t.due}</div>
-                <div className="text-slate-100">{fmtDate(bill.due, lang)}</div>
+                <div className="text-slate-900">{fmtDate(bill.due, lang)}</div>
               </div>
             </div>
-            <div className="border border-white/10 rounded-lg divide-y divide-white/10 mb-4">
+            <div className="border border-slate-200 rounded-lg divide-y divide-slate-200 mb-4">
               {bill.items.map((it, idx) => (
                 <div key={idx} className="flex items-center justify-between px-3 py-2 text-sm">
-                  <span className="text-slate-300">{it.product} <span className="text-slate-600">× {it.qty}</span></span>
-                  <span className="text-slate-100">{fmtTZS(it.qty * it.unitPrice)}</span>
+                  <span className="text-slate-700">{it.product} <span className="text-slate-400">× {it.qty}</span></span>
+                  <span className="text-slate-900">{fmtTZS(it.qty * it.unitPrice)}</span>
                 </div>
               ))}
-              <div className="flex items-center justify-between px-3 py-2.5 bg-white/5 rounded-b-lg">
+              <div className="flex items-center justify-between px-3 py-2.5 bg-slate-100 rounded-b-lg">
                 <span className="text-xs uppercase tracking-wide text-slate-500">{t.total}</span>
-                <span className="text-lg font-semibold text-slate-50">{fmtTZS(total)}</span>
+                <span className="text-lg font-semibold text-slate-900">{fmtTZS(total)}</span>
               </div>
             </div>
 
             {bill.status === "paid" && (
-              <div className="text-sm text-emerald-300">{t.alreadyPaid(fmtDate(bill.paid, lang))}</div>
+              <div className="text-sm text-emerald-700">{t.alreadyPaid(fmtDate(bill.paid, lang))}</div>
             )}
-            {bill.status === "expired" && <div className="text-sm text-rose-300">{t.expiredMsg}</div>}
+            {bill.status === "expired" && <div className="text-sm text-rose-700">{t.expiredMsg}</div>}
 
             {bill.status === "pending" && step === "lookup" && (
               <div className="space-y-4">
@@ -1904,8 +2027,8 @@ function PayView({ bills, onPay }) {
                         onClick={() => setChannel(ch)}
                         className={`text-sm px-3 py-2.5 rounded-lg border transition-colors ${
                           channel === ch
-                            ? "bg-indigo-500/20 border-indigo-400/50 text-indigo-200"
-                            : "border-white/10 text-slate-400 hover:border-white/25 hover:text-slate-200"
+                            ? "bg-violet-100 border-violet-400 text-violet-700"
+                            : "border-slate-200 text-slate-500 hover:border-slate-300 hover:text-slate-800"
                         }`}
                       >
                         {ch}
@@ -1916,7 +2039,7 @@ function PayView({ bills, onPay }) {
                 <Field label={t.accountLabel}>
                   <input value={account} onChange={(e) => setAccount(e.target.value)} className={inputCls} />
                 </Field>
-                {error && <div className="text-xs text-rose-400">{error}</div>}
+                {error && <div className="text-xs text-rose-600">{error}</div>}
                 <PrimaryButton onClick={startPay} className="w-full justify-center">
                   <CreditCard size={15} /> {t.payButton(fmtTZS(total))}
                 </PrimaryButton>
@@ -1925,8 +2048,8 @@ function PayView({ bills, onPay }) {
 
             {bill.status === "pending" && step === "confirm" && (
               <div className="space-y-4">
-                <div className="text-sm font-semibold text-slate-100">{t.confirmTitle}</div>
-                <p className="text-sm text-slate-400">{t.confirmText(channel, account)}</p>
+                <div className="text-sm font-semibold text-slate-900">{t.confirmTitle}</div>
+                <p className="text-sm text-slate-500">{t.confirmText(channel, account)}</p>
                 <div className="flex gap-2">
                   <PrimaryButton onClick={confirmPay}>
                     <Check size={15} /> {t.confirmButton}
@@ -1940,14 +2063,14 @@ function PayView({ bills, onPay }) {
 
         {bill && step === "done" && (
           <Card className="p-6 text-center">
-            <div className="w-12 h-12 mx-auto rounded-full bg-emerald-400/10 text-emerald-300 flex items-center justify-center ring-1 ring-emerald-400/20 mb-4">
+            <div className="w-12 h-12 mx-auto rounded-full bg-emerald-100 text-emerald-700 flex items-center justify-center ring-1 ring-emerald-200 mb-4">
               <Check size={24} />
             </div>
-            <h2 className="text-xl font-semibold text-slate-50 mb-1">{t.doneTitle}</h2>
-            <div className="text-2xl font-semibold text-emerald-300 mb-4">{fmtTZS(total)}</div>
+            <h2 className="text-xl font-semibold text-slate-900 mb-1">{t.doneTitle}</h2>
+            <div className="text-2xl font-semibold text-emerald-700 mb-4">{fmtTZS(total)}</div>
             <div className="text-xs text-slate-500 space-y-1 mb-5">
-              <div>{t.receipt}: <span className="font-mono text-slate-300">{receipt}</span></div>
-              <div>{t.paidVia}: <span className="text-slate-300">{channel}</span></div>
+              <div>{t.receipt}: <span className="font-mono text-slate-700">{receipt}</span></div>
+              <div>{t.paidVia}: <span className="text-slate-700">{channel}</span></div>
               <div>{bill.customer} · <span className="font-mono">{fmtControl(bill.control)}</span></div>
             </div>
             <GhostButton onClick={reset} className="mx-auto">{t.newPayment}</GhostButton>
@@ -1973,13 +2096,13 @@ const NAV_ORDER = ["create", "pending", "pay", "history", "expired", "stock", "t
 
 function LanguageSwitcher({ lang, setLang }) {
   return (
-    <div className="flex gap-1 bg-white/5 p-1 rounded-lg">
+    <div className="flex gap-1 bg-slate-100 p-1 rounded-lg">
       {LANGS.map((l) => (
         <button
           key={l.key}
           onClick={() => setLang(l.key)}
           className={`text-xs font-semibold px-2 py-1 rounded-md transition-colors ${
-            lang === l.key ? "bg-indigo-500 text-white" : "text-slate-500 hover:text-slate-300"
+            lang === l.key ? "bg-violet-600 text-white" : "text-slate-500 hover:text-slate-700"
           }`}
         >
           {l.label}
@@ -1989,25 +2112,135 @@ function LanguageSwitcher({ lang, setLang }) {
   );
 }
 
-function SidebarBody({ view, setView, pendingCount, expiredStockCount, expiringSoonCount, onNavigate, showLang }) {
+function LoginScreen({ onLogin, onCustomer }) {
+  const { lang, setLang, s } = useLang();
+  const t = s.auth;
+  const [role, setRole] = useState("owner");
+  const [pin, setPin] = useState("");
+  const [error, setError] = useState("");
+
+  const submit = () => {
+    if (pin === USERS[role].pin) {
+      setError("");
+      onLogin(role);
+    } else {
+      setError(t.errPin);
+    }
+  };
+
+  const roles = [
+    { key: "owner", label: t.owner, desc: t.ownerDesc, icon: ShieldCheck },
+    { key: "seller", label: t.seller, desc: t.sellerDesc, icon: Users },
+  ];
+
+  return (
+    <div className="w-full min-h-screen bg-gradient-to-b from-violet-700 via-violet-600 to-purple-800 flex flex-col font-sans antialiased">
+      <div className="flex justify-end p-4">
+        <LanguageSwitcher lang={lang} setLang={setLang} />
+      </div>
+      <div className="flex-1 flex flex-col items-center justify-center px-4 pb-10">
+        <div className="w-full max-w-md bg-white rounded-3xl shadow-2xl p-6 sm:p-8">
+          <div className="flex flex-col items-center text-center mb-6">
+            <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-violet-500 to-purple-700 flex items-center justify-center text-white font-bold text-xl shadow-lg mb-4">
+              B
+            </div>
+            <h1 className="text-2xl font-semibold text-slate-900 tracking-tight">{t.title}</h1>
+            <p className="text-sm text-slate-500 mt-1">{t.subtitle}</p>
+          </div>
+
+          <div className="text-xs font-medium tracking-wide text-slate-500 uppercase mb-2">{t.roleLabel}</div>
+          <div className="grid grid-cols-2 gap-3 mb-5">
+            {roles.map((r) => {
+              const Icon = r.icon;
+              const active = role === r.key;
+              return (
+                <button
+                  key={r.key}
+                  onClick={() => { setRole(r.key); setError(""); }}
+                  className={`text-left rounded-2xl border-2 p-3.5 transition-colors ${
+                    active ? "border-violet-600 bg-violet-50" : "border-slate-200 bg-white hover:border-slate-300"
+                  }`}
+                >
+                  <div className={`w-9 h-9 rounded-xl flex items-center justify-center mb-2 ${active ? "bg-violet-600 text-white" : "bg-slate-100 text-slate-500"}`}>
+                    <Icon size={18} />
+                  </div>
+                  <div className={`text-sm font-semibold ${active ? "text-violet-700" : "text-slate-900"}`}>{r.label}</div>
+                  <div className="text-xs text-slate-500 mt-0.5">{r.desc}</div>
+                </button>
+              );
+            })}
+          </div>
+
+          <Field label={t.pin}>
+            <input
+              type="password"
+              inputMode="numeric"
+              maxLength={8}
+              value={pin}
+              onChange={(e) => { setPin(e.target.value); setError(""); }}
+              onKeyDown={(e) => e.key === "Enter" && submit()}
+              placeholder={t.pinPlaceholder}
+              className={inputCls}
+            />
+          </Field>
+          {error && <div className="text-xs text-rose-600 mt-2">{error}</div>}
+          <PrimaryButton onClick={submit} className="w-full justify-center mt-5">
+            {t.signIn} <ChevronRight size={15} />
+          </PrimaryButton>
+        </div>
+
+        <button onClick={onCustomer} className="mt-6 text-sm text-violet-100 hover:text-white underline underline-offset-4">
+          {t.customerLink}
+        </button>
+      </div>
+    </div>
+  );
+}
+
+function CustomerPage({ bills, onPay, onBack }) {
+  const { lang, setLang, s } = useLang();
+  return (
+    <div className="w-full min-h-screen bg-slate-50 text-slate-800 font-sans antialiased">
+      <header className="sticky top-0 z-10 bg-white border-b border-slate-200 px-4 py-3 flex items-center justify-between">
+        <div className="flex items-center gap-2.5">
+          <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-violet-500 to-purple-700 flex items-center justify-center text-white font-bold text-sm">
+            B
+          </div>
+          <div className="text-base font-semibold text-slate-900 tracking-tight">BillManager</div>
+        </div>
+        <LanguageSwitcher lang={lang} setLang={setLang} />
+      </header>
+      <div className="max-w-xl mx-auto px-4 py-5">
+        <button onClick={onBack} className="text-sm text-violet-700 hover:underline mb-4">
+          ← {s.auth.back}
+        </button>
+        <PayView bills={bills} onPay={onPay} />
+      </div>
+    </div>
+  );
+}
+
+function SidebarBody({ view, setView, pendingCount, expiredStockCount, expiringSoonCount, onNavigate, showLang, user, onLogout }) {
   const { lang, setLang, s } = useLang();
   const go = (key) => {
     setView(key);
     if (onNavigate) onNavigate();
   };
+  const allowed = ROLE_ACCESS[user.role];
+  const roleLabel = user.role === "owner" ? s.auth.owner : s.auth.seller;
   return (
     <>
       <div>
-        <div className="px-5 pt-6 pb-5 border-b border-white/10 flex items-center gap-3">
-          <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-indigo-400 to-violet-600 flex items-center justify-center text-white font-bold text-sm shadow-md">
+        <div className="px-5 pt-6 pb-5 border-b border-slate-200 flex items-center gap-3">
+          <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-violet-500 to-purple-700 flex items-center justify-center text-white font-bold text-sm shadow-md">
             B
           </div>
           <div>
-            <div className="text-base font-semibold text-slate-50 tracking-tight leading-tight">BillManager</div>
-            <div className="text-xs text-slate-600 mt-0.5">{s.appVersion}</div>
+            <div className="text-base font-semibold text-slate-900 tracking-tight leading-tight">BillManager</div>
+            <div className="text-xs text-slate-400 mt-0.5">{s.appVersion}</div>
           </div>
           {onNavigate && (
-            <button onClick={onNavigate} className="ml-auto text-slate-500 hover:text-slate-200">
+            <button onClick={onNavigate} className="ml-auto text-slate-500 hover:text-slate-800">
               <X size={20} />
             </button>
           )}
@@ -2018,7 +2251,7 @@ function SidebarBody({ view, setView, pendingCount, expiredStockCount, expiringS
           </div>
         )}
         <nav className="px-3 py-4 space-y-1">
-          {NAV_ORDER.map((key) => {
+          {NAV_ORDER.filter((key) => allowed.includes(key)).map((key) => {
             const Icon = NAV_ICONS[key];
             const active = view === key;
             return (
@@ -2026,14 +2259,14 @@ function SidebarBody({ view, setView, pendingCount, expiredStockCount, expiringS
                 key={key}
                 onClick={() => go(key)}
                 className={`relative w-full flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-sm transition-all ${
-                  active ? "bg-indigo-500/20 text-indigo-200 font-medium" : "text-slate-400 hover:bg-white/5 hover:text-slate-200"
+                  active ? "bg-violet-100 text-violet-700 font-medium" : "text-slate-500 hover:bg-slate-100 hover:text-slate-800"
                 }`}
               >
-                {active && <span className="absolute left-0 top-1/2 -translate-y-1/2 h-5 w-1 rounded-full bg-indigo-400" />}
+                {active && <span className="absolute left-0 top-1/2 -translate-y-1/2 h-5 w-1 rounded-full bg-violet-600" />}
                 <Icon size={16} strokeWidth={active ? 2.3 : 2} />
                 <span className="flex-1 text-left">{s.nav[key]}</span>
                 {key === "pending" && pendingCount > 0 && (
-                  <span className="bg-amber-400/20 text-amber-300 text-xs font-semibold px-1.5 py-0.5 rounded-md min-w-5 text-center">
+                  <span className="bg-amber-100 text-amber-700 text-xs font-semibold px-1.5 py-0.5 rounded-md min-w-5 text-center">
                     {pendingCount}
                   </span>
                 )}
@@ -2042,14 +2275,27 @@ function SidebarBody({ view, setView, pendingCount, expiredStockCount, expiringS
           })}
         </nav>
       </div>
-      <div className="mx-4 mb-5 p-4 rounded-xl bg-white/5 border border-white/10 text-xs text-slate-500 space-y-2">
-        <div className="flex items-center gap-2">
-          <span className="w-1.5 h-1.5 rounded-full bg-rose-400" />
-          {s.sidebar.expired(expiredStockCount)}
-        </div>
-        <div className="flex items-center gap-2">
-          <span className="w-1.5 h-1.5 rounded-full bg-amber-400" />
-          {s.sidebar.soon(expiringSoonCount)}
+      <div>
+        {user.role === "owner" && (
+          <div className="mx-4 mb-3 p-4 rounded-xl bg-slate-100 border border-slate-200 text-xs text-slate-500 space-y-2">
+            <div className="flex items-center gap-2">
+              <span className="w-1.5 h-1.5 rounded-full bg-rose-400" />
+              {s.sidebar.expired(expiredStockCount)}
+            </div>
+            <div className="flex items-center gap-2">
+              <span className="w-1.5 h-1.5 rounded-full bg-amber-400" />
+              {s.sidebar.soon(expiringSoonCount)}
+            </div>
+          </div>
+        )}
+        <div className="mx-4 mb-5 p-3 rounded-xl bg-violet-50 border border-violet-100 flex items-center gap-3">
+          <div className="w-9 h-9 rounded-full bg-violet-600 text-white flex items-center justify-center font-semibold text-sm shrink-0">
+            {roleLabel.charAt(0)}
+          </div>
+          <div className="min-w-0 flex-1 text-sm font-medium text-slate-900 truncate">{roleLabel}</div>
+          <button onClick={onLogout} title={s.auth.logout} className="text-slate-500 hover:text-rose-600 transition-colors">
+            <LogOut size={17} />
+          </button>
         </div>
       </div>
     </>
@@ -2066,8 +2312,31 @@ export default function App() {
   const [showHelp, setShowHelp] = useState(false);
   const [createdBill, setCreatedBill] = useState(null);
   const [menuOpen, setMenuOpen] = useState(false);
+  const [user, setUser] = useState(() => {
+    try {
+      const r = sessionStorage.getItem("bm_role");
+      return r && USERS[r] ? { role: r } : null;
+    } catch (e) {
+      return null;
+    }
+  });
+  const [customerMode, setCustomerMode] = useState(false);
 
   const s = STRINGS[lang];
+
+  const login = (role) => {
+    try { sessionStorage.setItem("bm_role", role); } catch (e) { /* storage may be blocked */ }
+    setUser({ role });
+    setView("create");
+  };
+  const logout = () => {
+    try { sessionStorage.removeItem("bm_role"); } catch (e) { /* ignore */ }
+    setUser(null);
+    setMenuOpen(false);
+    setCreatedBill(null);
+  };
+  const allowedViews = user ? ROLE_ACCESS[user.role] : [];
+  const activeView = allowedViews.includes(view) ? view : "create";
 
   const pendingCount = bills.filter((b) => b.status === "pending").length;
   const expiredStockCount = inventory.filter((it) => daysBetween(it.expiry, TODAY) < 0).length;
@@ -2132,29 +2401,35 @@ export default function App() {
     addAudit("transfer", `${id} · ${product} · ${batch} · ${qty} ${from} → ${to}`);
   };
 
+  const sideProps = { view: activeView, setView, pendingCount, expiredStockCount, expiringSoonCount, user, onLogout: logout };
+
   return (
-    <LangContext.Provider value={{ lang, setLang, s }}>
-      <div className="w-full min-h-screen bg-slate-950">
-        <style>{`
-          html, body, #root { background-color: #020617; margin: 0; padding: 0; height: 100%; width: 100%; }
-          * { box-sizing: border-box; }
-        `}</style>
-        <div className="w-full min-h-screen bg-slate-950 text-slate-200 font-sans flex flex-col md:flex-row antialiased overflow-x-clip">
+    <LangContext.Provider value={{ lang, setLang, s, user }}>
+      <style>{`
+        html, body, #root { background-color: #f8fafc; margin: 0; padding: 0; height: 100%; width: 100%; }
+        * { box-sizing: border-box; }
+      `}</style>
+
+      {!user && !customerMode && <LoginScreen onLogin={login} onCustomer={() => setCustomerMode(true)} />}
+      {!user && customerMode && <CustomerPage bills={bills} onPay={handlePay} onBack={() => setCustomerMode(false)} />}
+
+      {user && (
+        <div className="w-full min-h-screen bg-slate-50 text-slate-800 font-sans flex flex-col md:flex-row antialiased overflow-x-clip">
           {/* Mobile top bar */}
-          <header className="md:hidden sticky top-0 z-10 bg-slate-950 border-b border-white/10 px-4 py-3 flex items-center justify-between">
+          <header className="md:hidden sticky top-0 z-10 bg-white border-b border-slate-200 px-4 py-3 flex items-center justify-between">
             <div className="flex items-center gap-2.5">
-              <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-indigo-400 to-violet-600 flex items-center justify-center text-white font-bold text-sm">
+              <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-violet-500 to-purple-700 flex items-center justify-center text-white font-bold text-sm">
                 B
               </div>
-              <div className="text-base font-semibold text-slate-50 tracking-tight">BillManager</div>
+              <div className="text-base font-semibold text-slate-900 tracking-tight">BillManager</div>
             </div>
             <div className="flex items-center gap-2">
               <LanguageSwitcher lang={lang} setLang={setLang} />
               <button
                 onClick={() => setMenuOpen(true)}
-                className="w-9 h-9 rounded-lg border border-white/10 flex items-center justify-center text-slate-300 hover:bg-white/5"
+                className="w-9 h-9 rounded-full bg-violet-600 text-white font-semibold text-sm flex items-center justify-center"
               >
-                <Menu size={18} />
+                {(user.role === "owner" ? s.auth.owner : s.auth.seller).charAt(0)}
               </button>
             </div>
           </header>
@@ -2162,45 +2437,59 @@ export default function App() {
           {/* Mobile menu drawer */}
           {menuOpen && (
             <div className="md:hidden fixed inset-0 z-30 flex">
-              <div className="w-72 max-w-full bg-slate-950 border-r border-white/10 flex flex-col justify-between overflow-y-auto">
-                <SidebarBody
-                  view={view}
-                  setView={setView}
-                  pendingCount={pendingCount}
-                  expiredStockCount={expiredStockCount}
-                  expiringSoonCount={expiringSoonCount}
-                  onNavigate={() => setMenuOpen(false)}
-                  showLang={false}
-                />
+              <div className="w-72 max-w-full bg-white border-r border-slate-200 flex flex-col justify-between overflow-y-auto">
+                <SidebarBody {...sideProps} onNavigate={() => setMenuOpen(false)} showLang={false} />
               </div>
               <div className="flex-1 bg-black/60" onClick={() => setMenuOpen(false)} />
             </div>
           )}
 
           {/* Desktop sidebar */}
-          <aside className="hidden md:flex w-64 shrink-0 border-r border-white/10 flex-col justify-between md:sticky md:top-0 md:h-screen md:overflow-y-auto bg-slate-950">
-            <SidebarBody
-              view={view}
-              setView={setView}
-              pendingCount={pendingCount}
-              expiredStockCount={expiredStockCount}
-              expiringSoonCount={expiringSoonCount}
-              showLang
-            />
+          <aside className="hidden md:flex w-64 shrink-0 border-r border-slate-200 flex-col justify-between md:sticky md:top-0 md:h-screen md:overflow-y-auto bg-white">
+            <SidebarBody {...sideProps} showLang />
           </aside>
 
           {/* Main */}
-          <main className="flex-1 min-w-0 px-4 py-5 md:px-8 md:py-8 max-w-6xl relative bg-slate-950">
-            {view === "create" && <CreateBillView inventory={inventory} onGenerate={handleGenerateBill} />}
-            {view === "pending" && <PendingBillsView bills={bills} onMarkPaid={handleMarkPaid} />}
-            {view === "pay" && <PayView bills={bills} onPay={handlePay} />}
-            {view === "history" && <PaymentHistoryView bills={bills} />}
-            {view === "expired" && <ExpiredBillsView bills={bills} />}
-            {view === "stock" && (
+          <main className="flex-1 min-w-0 w-full mx-auto px-4 pt-5 pb-28 md:px-8 md:py-8 max-w-6xl relative">
+            {activeView === "create" && <CreateBillView inventory={inventory} onGenerate={handleGenerateBill} />}
+            {activeView === "pending" && <PendingBillsView bills={bills} onMarkPaid={handleMarkPaid} />}
+            {activeView === "pay" && <PayView bills={bills} onPay={handlePay} />}
+            {activeView === "history" && <PaymentHistoryView bills={bills} />}
+            {activeView === "expired" && <ExpiredBillsView bills={bills} />}
+            {activeView === "stock" && (
               <StockManagementView inventory={inventory} onStockChange={handleStockChange} auditLog={auditLog} addAudit={addAudit} />
             )}
-            {view === "transfer" && <TransferView inventory={inventory} transfers={transfers} onSubmitTransfer={handleSubmitTransfer} />}
+            {activeView === "transfer" && <TransferView inventory={inventory} transfers={transfers} onSubmitTransfer={handleSubmitTransfer} />}
           </main>
+
+          {/* Mobile bottom navigation */}
+          <nav className="md:hidden fixed bottom-0 inset-x-0 z-10 bg-white border-t border-slate-200 flex">
+            {["create", "pending", "pay"].map((key) => {
+              const Icon = NAV_ICONS[key];
+              const active = activeView === key;
+              return (
+                <button
+                  key={key}
+                  onClick={() => setView(key)}
+                  className={`flex-1 flex flex-col items-center gap-1 py-2.5 text-xs ${active ? "text-violet-700 font-semibold" : "text-slate-500"}`}
+                >
+                  <span className="relative">
+                    <Icon size={21} strokeWidth={active ? 2.4 : 2} />
+                    {key === "pending" && pendingCount > 0 && (
+                      <span className="absolute -top-2 -right-3 bg-amber-500 text-white text-xs font-semibold px-1.5 rounded-full">
+                        {pendingCount}
+                      </span>
+                    )}
+                  </span>
+                  {s.tabs[key]}
+                </button>
+              );
+            })}
+            <button onClick={() => setMenuOpen(true)} className="flex-1 flex flex-col items-center gap-1 py-2.5 text-xs text-slate-500">
+              <Menu size={21} />
+              {s.tabs.more}
+            </button>
+          </nav>
 
           {createdBill && (
             <BillCreatedModal
@@ -2214,12 +2503,12 @@ export default function App() {
           )}
 
           {/* Help button */}
-          <div className="fixed bottom-4 right-4 md:bottom-6 md:right-6 z-10">
+          <div className="fixed bottom-20 right-4 md:bottom-6 md:right-6 z-10">
             {showHelp && (
-              <div className="mb-3 w-64 sm:w-72 bg-slate-900 border border-white/10 rounded-2xl p-4 shadow-2xl text-xs text-slate-400 space-y-2.5">
+              <div className="mb-3 w-64 sm:w-72 bg-white border border-slate-200 rounded-2xl p-4 shadow-2xl text-xs text-slate-500 space-y-2.5">
                 <div className="flex items-center justify-between mb-1">
-                  <span className="text-slate-100 font-semibold text-sm">{s.help.title}</span>
-                  <button onClick={() => setShowHelp(false)} className="text-slate-500 hover:text-slate-300">
+                  <span className="text-slate-900 font-semibold text-sm">{s.help.title}</span>
+                  <button onClick={() => setShowHelp(false)} className="text-slate-500 hover:text-slate-700">
                     <X size={14} />
                   </button>
                 </div>
@@ -2230,13 +2519,13 @@ export default function App() {
             )}
             <button
               onClick={() => setShowHelp((v) => !v)}
-              className="w-11 h-11 rounded-full bg-slate-900 border border-white/10 flex items-center justify-center text-slate-400 hover:text-indigo-300 hover:border-indigo-400/40 shadow-lg transition-colors"
+              className="w-11 h-11 rounded-full bg-white border border-slate-200 flex items-center justify-center text-slate-500 hover:text-violet-700 hover:border-violet-300 shadow-lg transition-colors"
             >
               <HelpCircle size={18} />
             </button>
           </div>
         </div>
-      </div>
+      )}
     </LangContext.Provider>
   );
 }
