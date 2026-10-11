@@ -28,6 +28,8 @@ import {
   LogOut,
   Users,
   ShieldCheck,
+  Eye,
+  EyeOff,
 } from "lucide-react";
 
 /* ----------------------------- i18n ----------------------------- */
@@ -782,14 +784,223 @@ Object.keys(AUTH_TEXT).forEach((l) => {
   STRINGS[l].tabs = AUTH_TEXT[l].tabs;
 });
 
-/* Demo PINs. CHANGE THESE before real use. They live in the code, so this is
-   NOT secure login; real security needs a backend (e.g. Supabase Auth). */
-const USERS = {
-  owner: { role: "owner", pin: "1234" },
-  seller: { role: "seller", pin: "0000" },
+/* ---- Accounts (owner PIN + sellers) texts ---- */
+const AUTH2 = {
+  sw: {
+    navUsers: "Watumiaji",
+    auth: {
+      errPinFor: (who) => `PIN si sahihi kwa ${who}. Kila akaunti ina PIN yake.`,
+      errLen: "PIN iwe tarakimu 4 hadi 8 pekee.",
+      errMatch: "PIN hazilingani.",
+      noSellers: "Bado hakuna muuzaji. Mmiliki aingie kwanza na kuongeza muuzaji kwenye ukurasa wa Watumiaji.",
+      pickSeller: "Chagua jina lako",
+      setupTitle: "Anzisha Akaunti ya Mmiliki",
+      setupSub: "Weka PIN ya siri (tarakimu 4 hadi 8). Utaitumia kila unapoingia.",
+      pinNew: "PIN Mpya",
+      pinConfirm: "Rudia PIN",
+      setupBtn: "Hifadhi na Endelea",
+      forgot: "Umesahau PIN? Futa data ya tovuti hii kwenye kivinjari ili kuanza upya.",
+    },
+    users: {
+      title: "Watumiaji",
+      subtitle: "Dhibiti PIN ya mmiliki na akaunti za wauzaji",
+      deviceNote: "Akaunti zinahifadhiwa kwenye kifaa hiki pekee. Ili wauzaji waingie kutoka simu zao wenyewe, tutahitaji hifadhi ya mtandaoni (database).",
+      ownerPin: "PIN ya Mmiliki",
+      currentPin: "PIN ya sasa",
+      newPin: "PIN mpya",
+      confirmPin: "Rudia PIN mpya",
+      changePin: "Badilisha PIN",
+      pinChanged: "PIN imebadilishwa.",
+      wrongCurrent: "PIN ya sasa si sahihi.",
+      sellers: "Wauzaji",
+      noneYet: "Hakuna wauzaji bado. Ongeza wa kwanza hapa chini.",
+      addSeller: "Ongeza Muuzaji",
+      sellerName: "Jina la Muuzaji",
+      sellerNamePh: "Mfano: Asha",
+      sellerPin: "PIN ya Muuzaji",
+      add: "Ongeza",
+      nameRequired: "Weka jina la muuzaji.",
+      nameExists: "Jina hili tayari lipo.",
+      sellerAdded: "Muuzaji ameongezwa.",
+      saved: "PIN imehifadhiwa.",
+      editPin: "Badilisha PIN",
+      save: "Hifadhi",
+      cancel: "Ghairi",
+      remove: "Futa",
+      confirmRemove: "Bonyeza tena kufuta",
+    },
+  },
+  en: {
+    navUsers: "Users",
+    auth: {
+      errPinFor: (who) => `Wrong PIN for ${who}. Each account has its own PIN.`,
+      errLen: "The PIN must be 4 to 8 digits only.",
+      errMatch: "The PINs do not match.",
+      noSellers: "There is no seller yet. The owner must sign in first and add a seller on the Users page.",
+      pickSeller: "Choose your name",
+      setupTitle: "Set Up the Owner Account",
+      setupSub: "Choose a secret PIN (4 to 8 digits). You will use it every time you sign in.",
+      pinNew: "New PIN",
+      pinConfirm: "Repeat PIN",
+      setupBtn: "Save and Continue",
+      forgot: "Forgot the PIN? Clear this site's data in your browser to start over.",
+    },
+    users: {
+      title: "Users",
+      subtitle: "Manage the owner PIN and seller accounts",
+      deviceNote: "Accounts are saved on this device only. For sellers to sign in from their own phones, we will need an online database.",
+      ownerPin: "Owner PIN",
+      currentPin: "Current PIN",
+      newPin: "New PIN",
+      confirmPin: "Repeat new PIN",
+      changePin: "Change PIN",
+      pinChanged: "PIN changed.",
+      wrongCurrent: "The current PIN is wrong.",
+      sellers: "Sellers",
+      noneYet: "No sellers yet. Add the first one below.",
+      addSeller: "Add Seller",
+      sellerName: "Seller Name",
+      sellerNamePh: "e.g. Asha",
+      sellerPin: "Seller PIN",
+      add: "Add",
+      nameRequired: "Enter the seller's name.",
+      nameExists: "This name already exists.",
+      sellerAdded: "Seller added.",
+      saved: "PIN saved.",
+      editPin: "Change PIN",
+      save: "Save",
+      cancel: "Cancel",
+      remove: "Delete",
+      confirmRemove: "Tap again to delete",
+    },
+  },
+  fr: {
+    navUsers: "Utilisateurs",
+    auth: {
+      errPinFor: (who) => `PIN incorrect pour ${who}. Chaque compte a son propre PIN.`,
+      errLen: "Le PIN doit comporter 4 à 8 chiffres uniquement.",
+      errMatch: "Les PIN ne correspondent pas.",
+      noSellers: "Aucun vendeur pour le moment. Le propriétaire doit d'abord se connecter et ajouter un vendeur dans la page Utilisateurs.",
+      pickSeller: "Choisissez votre nom",
+      setupTitle: "Créer le Compte Propriétaire",
+      setupSub: "Choisissez un PIN secret (4 à 8 chiffres). Vous l'utiliserez à chaque connexion.",
+      pinNew: "Nouveau PIN",
+      pinConfirm: "Répétez le PIN",
+      setupBtn: "Enregistrer et Continuer",
+      forgot: "PIN oublié ? Effacez les données de ce site dans votre navigateur pour recommencer.",
+    },
+    users: {
+      title: "Utilisateurs",
+      subtitle: "Gérez le PIN du propriétaire et les comptes vendeurs",
+      deviceNote: "Les comptes sont enregistrés sur cet appareil uniquement. Pour que les vendeurs se connectent depuis leur téléphone, il faudra une base de données en ligne.",
+      ownerPin: "PIN du Propriétaire",
+      currentPin: "PIN actuel",
+      newPin: "Nouveau PIN",
+      confirmPin: "Répétez le nouveau PIN",
+      changePin: "Changer le PIN",
+      pinChanged: "PIN modifié.",
+      wrongCurrent: "Le PIN actuel est incorrect.",
+      sellers: "Vendeurs",
+      noneYet: "Aucun vendeur pour le moment. Ajoutez le premier ci-dessous.",
+      addSeller: "Ajouter un Vendeur",
+      sellerName: "Nom du Vendeur",
+      sellerNamePh: "ex : Asha",
+      sellerPin: "PIN du Vendeur",
+      add: "Ajouter",
+      nameRequired: "Saisissez le nom du vendeur.",
+      nameExists: "Ce nom existe déjà.",
+      sellerAdded: "Vendeur ajouté.",
+      saved: "PIN enregistré.",
+      editPin: "Changer le PIN",
+      save: "Enregistrer",
+      cancel: "Annuler",
+      remove: "Supprimer",
+      confirmRemove: "Touchez à nouveau pour supprimer",
+    },
+  },
 };
+Object.keys(AUTH2).forEach((l) => {
+  STRINGS[l].nav = { ...STRINGS[l].nav, users: AUTH2[l].navUsers };
+  STRINGS[l].auth = { ...STRINGS[l].auth, ...AUTH2[l].auth };
+  STRINGS[l].users = AUTH2[l].users;
+});
+
+/* ---- Seller restrictions + easier "add seller" texts ---- */
+const AUTH3 = {
+  sw: {
+    navUsers: "Wauzaji",
+    users: {
+      title: "Wauzaji na PIN",
+      subtitle: "Ongeza wauzaji, badilisha PIN zao na PIN yako",
+      sellerAdded: "Muuzaji ameongezwa. Sasa anaweza kuingia mwenyewe kwa jina lake na PIN yake.",
+      noSellerBanner: "Bado hujaongeza muuzaji. Ongeza muuzaji ili aingie na kuuza kwa PIN yake mwenyewe.",
+    },
+    create: {
+      sellerNote: "Bei, namba ya bachi na tarehe ya kuisha hujazwa na mfumo. Mmiliki pekee ndiye anaweza kubadilisha bei au bidhaa.",
+      noStock: "Hakuna bidhaa zinazopatikana kuuzwa kwa sasa.",
+      pickProduct: "Chagua bidhaa",
+    },
+  },
+  en: {
+    navUsers: "Sellers",
+    users: {
+      title: "Sellers & PINs",
+      subtitle: "Add sellers, and change their PINs and your own",
+      sellerAdded: "Seller added. They can now sign in on their own with their name and PIN.",
+      noSellerBanner: "You haven't added a seller yet. Add one so they can sign in and sell with their own PIN.",
+    },
+    create: {
+      sellerNote: "Price, batch number and expiry are filled in by the system. Only the owner can change prices or products.",
+      noStock: "No products are available to sell right now.",
+      pickProduct: "Choose a product",
+    },
+  },
+  fr: {
+    navUsers: "Vendeurs",
+    users: {
+      title: "Vendeurs et PIN",
+      subtitle: "Ajoutez des vendeurs, et modifiez leurs PIN et le vôtre",
+      sellerAdded: "Vendeur ajouté. Il peut maintenant se connecter seul avec son nom et son PIN.",
+      noSellerBanner: "Vous n'avez pas encore ajouté de vendeur. Ajoutez-en un pour qu'il se connecte et vende avec son propre PIN.",
+    },
+    create: {
+      sellerNote: "Le prix, le numéro de lot et l'expiration sont remplis par le système. Seul le propriétaire peut modifier les prix ou les produits.",
+      noStock: "Aucun produit disponible à la vente pour le moment.",
+      pickProduct: "Choisissez un produit",
+    },
+  },
+};
+Object.keys(AUTH3).forEach((l) => {
+  STRINGS[l].nav = { ...STRINGS[l].nav, users: AUTH3[l].navUsers };
+  STRINGS[l].users = { ...STRINGS[l].users, ...AUTH3[l].users };
+  STRINGS[l].create = { ...STRINGS[l].create, ...AUTH3[l].create };
+});
+
+/* Accounts live in this browser (localStorage). They are NOT encrypted and are
+   NOT shared between devices; real security needs a backend (e.g. Supabase Auth). */
+const ACCOUNTS_KEY = "bm_accounts_v1";
+const SESSION_KEY = "bm_session_v1";
+function loadAccounts() {
+  try {
+    const raw = localStorage.getItem(ACCOUNTS_KEY);
+    if (raw) {
+      const a = JSON.parse(raw);
+      if (a && a.owner && /^\d{4,8}$/.test(a.owner.pin) && Array.isArray(a.sellers)) return a;
+    }
+  } catch (e) {
+    /* storage unavailable */
+  }
+  return null;
+}
+function saveAccounts(a) {
+  try {
+    localStorage.setItem(ACCOUNTS_KEY, JSON.stringify(a));
+  } catch (e) {
+    /* storage unavailable: accounts stay in memory for this visit */
+  }
+}
 const ROLE_ACCESS = {
-  owner: ["create", "pending", "pay", "history", "expired", "stock", "transfer"],
+  owner: ["create", "pending", "pay", "history", "expired", "stock", "transfer", "users"],
   seller: ["create", "pending", "pay", "history"],
 };
 
@@ -1033,8 +1244,17 @@ function GhostButton({ children, onClick, className = "" }) {
 
 /* ----------------------------- views ----------------------------- */
 
+function ReadBox({ children, mono }) {
+  return (
+    <div className={`w-full bg-slate-100 border border-slate-200 rounded-lg px-3.5 py-2.5 text-sm text-slate-600 ${mono ? "font-mono" : ""}`}>
+      {children}
+    </div>
+  );
+}
+
 function CreateBillView({ inventory, onGenerate }) {
-  const { lang, s } = useLang();
+  const { lang, s, user } = useLang();
+  const isSeller = !!user && user.role === "seller";
   const t = s.create;
   const [customerName, setCustomerName] = useState("");
   const [phone, setPhone] = useState("");
@@ -1042,9 +1262,45 @@ function CreateBillView({ inventory, onGenerate }) {
   const [rows, setRows] = useState([{ rid: 1, product: "", batch: "BT-0000", qty: 1, unitPrice: 0, expiry: "" }]);
   const [error, setError] = useState("");
 
-  const oldestStock = useMemo(
-    () => [...inventory].sort((a, b) => parseDate(a.received) - parseDate(b.received)).slice(0, 4),
+  // Sellers may only sell in-date stock that is available; oldest first.
+  const sellable = useMemo(
+    () =>
+      [...inventory]
+        .filter((it) => it.qty > 0 && daysBetween(it.expiry, TODAY) >= 0)
+        .sort((a, b) => parseDate(a.received) - parseDate(b.received)),
     [inventory]
+  );
+  const oldestStock = useMemo(
+    () => (isSeller ? sellable : [...inventory].sort((a, b) => parseDate(a.received) - parseDate(b.received))).slice(0, 4),
+    [inventory, sellable, isSeller]
+  );
+
+  const pickProduct = (rid, invId) => {
+    const it = inventory.find((x) => String(x.id) === String(invId));
+    if (!it) {
+      updateRow(rid, { product: "", batch: "BT-0000", unitPrice: 0, expiry: "", invId: null, qty: 1 });
+      return;
+    }
+    updateRow(rid, { product: it.product, batch: it.batch, unitPrice: it.unitPrice, expiry: it.expiry, invId: it.id, qty: 1 });
+  };
+  const updateQty = (rid, value) => {
+    const row = rows.find((r) => r.rid === rid);
+    let v = value;
+    if (isSeller && row && row.invId) {
+      const it = inventory.find((x) => x.id === row.invId);
+      if (it && Number(v) > it.qty) v = String(it.qty);
+    }
+    updateRow(rid, { qty: v });
+  };
+  const productSelect = (r, cls) => (
+    <select value={r.invId || ""} onChange={(e) => pickProduct(r.rid, e.target.value)} className={cls}>
+      <option value="">{t.pickProduct}</option>
+      {sellable.map((it) => (
+        <option key={it.id} value={it.id}>
+          {it.product} · {it.batch} ({it.qty})
+        </option>
+      ))}
+    </select>
   );
 
   const updateRow = (rid, patch) => setRows((rs) => rs.map((r) => (r.rid === rid ? { ...r, ...patch } : r)));
@@ -1053,7 +1309,7 @@ function CreateBillView({ inventory, onGenerate }) {
 
   const applySuggestion = (item) => {
     const emptyIdx = rows.findIndex((r) => !r.product);
-    const patch = { product: item.product, batch: item.batch, unitPrice: item.unitPrice, expiry: item.expiry };
+    const patch = { product: item.product, batch: item.batch, unitPrice: item.unitPrice, expiry: item.expiry, invId: item.id };
     if (emptyIdx >= 0) {
       setRows((rs) => rs.map((r, i) => (i === emptyIdx ? { ...r, ...patch } : r)));
     } else {
@@ -1068,7 +1324,7 @@ function CreateBillView({ inventory, onGenerate }) {
       setError(t.errFields);
       return;
     }
-    const validRows = rows.filter((r) => r.product.trim() && Number(r.qty) > 0);
+    const validRows = rows.filter((r) => r.product.trim() && Number(r.qty) > 0 && (!isSeller || r.invId));
     if (validRows.length === 0) {
       setError(t.errItems);
       return;
@@ -1089,6 +1345,10 @@ function CreateBillView({ inventory, onGenerate }) {
   return (
     <div>
       <PageHeader title={t.title} subtitle={t.subtitle} icon={Plus} />
+
+      {isSeller && (
+        <div className="mb-5 bg-violet-50 border border-violet-200 rounded-xl px-4 py-3 text-xs text-violet-900">{t.sellerNote}</div>
+      )}
 
       <Card className="p-5 mb-6">
         <div className="flex items-center gap-2 mb-4">
@@ -1121,6 +1381,10 @@ function CreateBillView({ inventory, onGenerate }) {
         </Field>
       </div>
 
+      {isSeller && sellable.length === 0 && (
+        <div className="mb-4 bg-amber-50 border border-amber-200 rounded-xl px-4 py-3 text-xs text-amber-800">{t.noStock}</div>
+      )}
+
       <div className="flex items-center justify-between mb-3">
         <div className="text-xs font-medium tracking-wide text-slate-500 uppercase">{t.lineItems}</div>
         <GhostButton onClick={addRow}>
@@ -1145,45 +1409,61 @@ function CreateBillView({ inventory, onGenerate }) {
             {rows.map((r) => (
               <tr key={r.rid} className="border-t border-slate-200">
                 <Td>
-                  <input
-                    value={r.product}
-                    onChange={(e) => updateRow(r.rid, { product: e.target.value })}
-                    placeholder={t.productPlaceholder}
-                    className="w-full bg-transparent text-slate-800 placeholder-slate-400 outline-none"
-                  />
+                  {isSeller ? (
+                    productSelect(r, "w-full bg-transparent text-slate-800 outline-none")
+                  ) : (
+                    <input
+                      value={r.product}
+                      onChange={(e) => updateRow(r.rid, { product: e.target.value })}
+                      placeholder={t.productPlaceholder}
+                      className="w-full bg-transparent text-slate-800 placeholder-slate-400 outline-none"
+                    />
+                  )}
                 </Td>
                 <Td>
-                  <input
-                    value={r.batch}
-                    onChange={(e) => updateRow(r.rid, { batch: e.target.value })}
-                    className="w-24 bg-transparent text-slate-500 font-mono text-xs outline-none"
-                  />
+                  {isSeller ? (
+                    <span className="font-mono text-xs text-slate-500">{r.invId ? r.batch : "—"}</span>
+                  ) : (
+                    <input
+                      value={r.batch}
+                      onChange={(e) => updateRow(r.rid, { batch: e.target.value })}
+                      className="w-24 bg-transparent text-slate-500 font-mono text-xs outline-none"
+                    />
+                  )}
                 </Td>
                 <Td>
                   <input
                     type="number"
                     min="1"
                     value={r.qty}
-                    onChange={(e) => updateRow(r.rid, { qty: e.target.value })}
+                    onChange={(e) => updateQty(r.rid, e.target.value)}
                     className="w-16 bg-transparent text-slate-800 outline-none"
                   />
                 </Td>
                 <Td>
-                  <input
-                    type="number"
-                    min="0"
-                    value={r.unitPrice}
-                    onChange={(e) => updateRow(r.rid, { unitPrice: e.target.value })}
-                    className="w-24 bg-transparent text-slate-800 outline-none"
-                  />
+                  {isSeller ? (
+                    <span className="text-slate-800">{r.invId ? fmtTZS(r.unitPrice) : "—"}</span>
+                  ) : (
+                    <input
+                      type="number"
+                      min="0"
+                      value={r.unitPrice}
+                      onChange={(e) => updateRow(r.rid, { unitPrice: e.target.value })}
+                      className="w-24 bg-transparent text-slate-800 outline-none"
+                    />
+                  )}
                 </Td>
                 <Td>
-                  <input
-                    type="date"
-                    value={r.expiry}
-                    onChange={(e) => updateRow(r.rid, { expiry: e.target.value })}
-                    className="bg-transparent text-slate-500 outline-none text-xs"
-                  />
+                  {isSeller ? (
+                    <span className="text-xs text-slate-500">{r.invId ? r.expiry.slice(0, 7) : "—"}</span>
+                  ) : (
+                    <input
+                      type="date"
+                      value={r.expiry}
+                      onChange={(e) => updateRow(r.rid, { expiry: e.target.value })}
+                      className="bg-transparent text-slate-500 outline-none text-xs"
+                    />
+                  )}
                 </Td>
                 <Td className="text-right font-semibold text-slate-900">
                   {fmtTZS((Number(r.qty) || 0) * (Number(r.unitPrice) || 0))}
@@ -1209,22 +1489,38 @@ function CreateBillView({ inventory, onGenerate }) {
               </button>
             </div>
             <Field label={t.colProduct}>
-              <input value={r.product} onChange={(e) => updateRow(r.rid, { product: e.target.value })} placeholder={t.productPlaceholder} className={inputCls} />
+              {isSeller ? (
+                productSelect(r, inputCls)
+              ) : (
+                <input value={r.product} onChange={(e) => updateRow(r.rid, { product: e.target.value })} placeholder={t.productPlaceholder} className={inputCls} />
+              )}
             </Field>
             <div className="grid grid-cols-2 gap-3">
               <Field label={t.colQty}>
-                <input type="number" min="1" value={r.qty} onChange={(e) => updateRow(r.rid, { qty: e.target.value })} className={inputCls} />
+                <input type="number" min="1" value={r.qty} onChange={(e) => updateQty(r.rid, e.target.value)} className={inputCls} />
               </Field>
               <Field label={t.colUnitPrice}>
-                <input type="number" min="0" value={r.unitPrice} onChange={(e) => updateRow(r.rid, { unitPrice: e.target.value })} className={inputCls} />
+                {isSeller ? (
+                  <ReadBox>{r.invId ? fmtTZS(r.unitPrice) : "—"}</ReadBox>
+                ) : (
+                  <input type="number" min="0" value={r.unitPrice} onChange={(e) => updateRow(r.rid, { unitPrice: e.target.value })} className={inputCls} />
+                )}
               </Field>
             </div>
             <div className="grid grid-cols-2 gap-3">
               <Field label={t.colBatch}>
-                <input value={r.batch} onChange={(e) => updateRow(r.rid, { batch: e.target.value })} className={inputCls + " font-mono"} />
+                {isSeller ? (
+                  <ReadBox mono>{r.invId ? r.batch : "—"}</ReadBox>
+                ) : (
+                  <input value={r.batch} onChange={(e) => updateRow(r.rid, { batch: e.target.value })} className={inputCls + " font-mono"} />
+                )}
               </Field>
               <Field label={t.colExpiry}>
-                <input type="date" value={r.expiry} onChange={(e) => updateRow(r.rid, { expiry: e.target.value })} className={inputCls} />
+                {isSeller ? (
+                  <ReadBox>{r.invId ? r.expiry.slice(0, 7) : "—"}</ReadBox>
+                ) : (
+                  <input type="date" value={r.expiry} onChange={(e) => updateRow(r.rid, { expiry: e.target.value })} className={inputCls} />
+                )}
               </Field>
             </div>
             <div className="flex items-center justify-between pt-3 border-t border-slate-200">
@@ -2091,8 +2387,9 @@ const NAV_ICONS = {
   expired: XCircle,
   stock: ArrowUpDown,
   transfer: ArrowLeftRight,
+  users: Users,
 };
-const NAV_ORDER = ["create", "pending", "pay", "history", "expired", "stock", "transfer"];
+const NAV_ORDER = ["create", "pending", "pay", "history", "expired", "stock", "transfer", "users"];
 
 function LanguageSwitcher({ lang, setLang }) {
   return (
@@ -2112,19 +2409,112 @@ function LanguageSwitcher({ lang, setLang }) {
   );
 }
 
-function LoginScreen({ onLogin, onCustomer }) {
+function PinInput({ value, onChange, placeholder, onEnter }) {
+  const [show, setShow] = useState(false);
+  return (
+    <div className="relative">
+      <input
+        type={show ? "text" : "password"}
+        inputMode="numeric"
+        autoComplete="off"
+        maxLength={8}
+        value={value}
+        onChange={(e) => onChange(e.target.value.replace(/\D/g, ""))}
+        onKeyDown={(e) => e.key === "Enter" && onEnter && onEnter()}
+        placeholder={placeholder}
+        className={inputCls + " pr-11"}
+      />
+      <button
+        type="button"
+        onClick={() => setShow((v) => !v)}
+        className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-700"
+      >
+        {show ? <EyeOff size={17} /> : <Eye size={17} />}
+      </button>
+    </div>
+  );
+}
+
+function AuthShell({ children }) {
   const { lang, setLang, s } = useLang();
+  return (
+    <div className="w-full min-h-screen bg-gradient-to-b from-violet-700 via-violet-600 to-purple-800 flex flex-col font-sans antialiased">
+      <div className="flex justify-end p-4">
+        <LanguageSwitcher lang={lang} setLang={setLang} />
+      </div>
+      <div className="flex-1 flex flex-col items-center justify-center px-4 pb-10">{children}</div>
+    </div>
+  );
+}
+
+function SetupScreen({ onDone }) {
+  const { s } = useLang();
   const t = s.auth;
-  const [role, setRole] = useState("owner");
   const [pin, setPin] = useState("");
+  const [pin2, setPin2] = useState("");
   const [error, setError] = useState("");
 
   const submit = () => {
-    if (pin === USERS[role].pin) {
-      setError("");
-      onLogin(role);
+    if (!/^\d{4,8}$/.test(pin)) return setError(t.errLen);
+    if (pin !== pin2) return setError(t.errMatch);
+    onDone(pin);
+  };
+
+  return (
+    <AuthShell>
+      <div className="w-full max-w-md bg-white rounded-3xl shadow-2xl p-6 sm:p-8">
+        <div className="flex flex-col items-center text-center mb-6">
+          <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-violet-500 to-purple-700 flex items-center justify-center text-white shadow-lg mb-4">
+            <ShieldCheck size={26} />
+          </div>
+          <h1 className="text-2xl font-semibold text-slate-900 tracking-tight">{t.setupTitle}</h1>
+          <p className="text-sm text-slate-500 mt-1">{t.setupSub}</p>
+        </div>
+        <div className="space-y-4">
+          <Field label={t.pinNew}>
+            <PinInput value={pin} onChange={(v) => { setPin(v); setError(""); }} placeholder="••••" />
+          </Field>
+          <Field label={t.pinConfirm}>
+            <PinInput value={pin2} onChange={(v) => { setPin2(v); setError(""); }} placeholder="••••" onEnter={submit} />
+          </Field>
+        </div>
+        {error && <div className="text-xs text-rose-600 mt-3">{error}</div>}
+        <PrimaryButton onClick={submit} className="w-full justify-center mt-5">
+          {t.setupBtn} <ChevronRight size={15} />
+        </PrimaryButton>
+      </div>
+    </AuthShell>
+  );
+}
+
+function LoginScreen({ accounts, onLogin, onCustomer }) {
+  const { s } = useLang();
+  const t = s.auth;
+  const [role, setRole] = useState("owner");
+  const [sellerId, setSellerId] = useState("");
+  const [pin, setPin] = useState("");
+  const [error, setError] = useState("");
+
+  const sellers = accounts.sellers;
+  const seller = sellers.find((x) => x.id === sellerId) || sellers[0];
+
+  const submit = () => {
+    if (role === "owner") {
+      if (pin === accounts.owner.pin) {
+        onLogin({ role: "owner" });
+      } else {
+        setError(t.errPinFor(t.owner));
+      }
+      return;
+    }
+    if (!seller) {
+      setError(t.noSellers);
+      return;
+    }
+    if (pin === seller.pin) {
+      onLogin({ role: "seller", id: seller.id, name: seller.name });
     } else {
-      setError(t.errPin);
+      setError(t.errPinFor(seller.name));
     }
   };
 
@@ -2134,64 +2524,208 @@ function LoginScreen({ onLogin, onCustomer }) {
   ];
 
   return (
-    <div className="w-full min-h-screen bg-gradient-to-b from-violet-700 via-violet-600 to-purple-800 flex flex-col font-sans antialiased">
-      <div className="flex justify-end p-4">
-        <LanguageSwitcher lang={lang} setLang={setLang} />
-      </div>
-      <div className="flex-1 flex flex-col items-center justify-center px-4 pb-10">
-        <div className="w-full max-w-md bg-white rounded-3xl shadow-2xl p-6 sm:p-8">
-          <div className="flex flex-col items-center text-center mb-6">
-            <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-violet-500 to-purple-700 flex items-center justify-center text-white font-bold text-xl shadow-lg mb-4">
-              B
-            </div>
-            <h1 className="text-2xl font-semibold text-slate-900 tracking-tight">{t.title}</h1>
-            <p className="text-sm text-slate-500 mt-1">{t.subtitle}</p>
+    <AuthShell>
+      <div className="w-full max-w-md bg-white rounded-3xl shadow-2xl p-6 sm:p-8">
+        <div className="flex flex-col items-center text-center mb-6">
+          <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-violet-500 to-purple-700 flex items-center justify-center text-white font-bold text-xl shadow-lg mb-4">
+            B
           </div>
-
-          <div className="text-xs font-medium tracking-wide text-slate-500 uppercase mb-2">{t.roleLabel}</div>
-          <div className="grid grid-cols-2 gap-3 mb-5">
-            {roles.map((r) => {
-              const Icon = r.icon;
-              const active = role === r.key;
-              return (
-                <button
-                  key={r.key}
-                  onClick={() => { setRole(r.key); setError(""); }}
-                  className={`text-left rounded-2xl border-2 p-3.5 transition-colors ${
-                    active ? "border-violet-600 bg-violet-50" : "border-slate-200 bg-white hover:border-slate-300"
-                  }`}
-                >
-                  <div className={`w-9 h-9 rounded-xl flex items-center justify-center mb-2 ${active ? "bg-violet-600 text-white" : "bg-slate-100 text-slate-500"}`}>
-                    <Icon size={18} />
-                  </div>
-                  <div className={`text-sm font-semibold ${active ? "text-violet-700" : "text-slate-900"}`}>{r.label}</div>
-                  <div className="text-xs text-slate-500 mt-0.5">{r.desc}</div>
-                </button>
-              );
-            })}
-          </div>
-
-          <Field label={t.pin}>
-            <input
-              type="password"
-              inputMode="numeric"
-              maxLength={8}
-              value={pin}
-              onChange={(e) => { setPin(e.target.value); setError(""); }}
-              onKeyDown={(e) => e.key === "Enter" && submit()}
-              placeholder={t.pinPlaceholder}
-              className={inputCls}
-            />
-          </Field>
-          {error && <div className="text-xs text-rose-600 mt-2">{error}</div>}
-          <PrimaryButton onClick={submit} className="w-full justify-center mt-5">
-            {t.signIn} <ChevronRight size={15} />
-          </PrimaryButton>
+          <h1 className="text-2xl font-semibold text-slate-900 tracking-tight">{t.title}</h1>
+          <p className="text-sm text-slate-500 mt-1">{t.subtitle}</p>
         </div>
 
-        <button onClick={onCustomer} className="mt-6 text-sm text-violet-100 hover:text-white underline underline-offset-4">
-          {t.customerLink}
-        </button>
+        <div className="text-xs font-medium tracking-wide text-slate-500 uppercase mb-2">{t.roleLabel}</div>
+        <div className="grid grid-cols-2 gap-3 mb-5">
+          {roles.map((r) => {
+            const Icon = r.icon;
+            const active = role === r.key;
+            return (
+              <button
+                key={r.key}
+                onClick={() => { setRole(r.key); setPin(""); setError(""); }}
+                className={`text-left rounded-2xl border-2 p-3.5 transition-colors ${
+                  active ? "border-violet-600 bg-violet-50" : "border-slate-200 bg-white hover:border-slate-300"
+                }`}
+              >
+                <div className={`w-9 h-9 rounded-xl flex items-center justify-center mb-2 ${active ? "bg-violet-600 text-white" : "bg-slate-100 text-slate-500"}`}>
+                  <Icon size={18} />
+                </div>
+                <div className={`text-sm font-semibold ${active ? "text-violet-700" : "text-slate-900"}`}>{r.label}</div>
+                <div className="text-xs text-slate-500 mt-0.5">{r.desc}</div>
+              </button>
+            );
+          })}
+        </div>
+
+        <div className="space-y-4">
+          {role === "seller" && (
+            sellers.length === 0 ? (
+              <div className="bg-amber-50 border border-amber-200 rounded-xl px-4 py-3 text-xs text-amber-800">{t.noSellers}</div>
+            ) : (
+              <Field label={t.pickSeller}>
+                <select
+                  value={seller ? seller.id : ""}
+                  onChange={(e) => { setSellerId(e.target.value); setPin(""); setError(""); }}
+                  className={inputCls}
+                >
+                  {sellers.map((x) => (
+                    <option key={x.id} value={x.id}>{x.name}</option>
+                  ))}
+                </select>
+              </Field>
+            )
+          )}
+          <Field label={t.pin}>
+            <PinInput value={pin} onChange={(v) => { setPin(v); setError(""); }} placeholder={t.pinPlaceholder} onEnter={submit} />
+          </Field>
+        </div>
+        {error && <div className="text-xs text-rose-600 mt-3">{error}</div>}
+        <PrimaryButton onClick={submit} className="w-full justify-center mt-5">
+          {t.signIn} <ChevronRight size={15} />
+        </PrimaryButton>
+        <p className="text-xs text-slate-400 mt-4 text-center">{t.forgot}</p>
+      </div>
+
+      <button onClick={onCustomer} className="mt-6 text-sm text-violet-100 hover:text-white underline underline-offset-4">
+        {t.customerLink}
+      </button>
+    </AuthShell>
+  );
+}
+
+function Msg({ msg }) {
+  if (!msg.text) return null;
+  return <div className={`text-xs mt-3 ${msg.type === "err" ? "text-rose-600" : "text-emerald-700"}`}>{msg.text}</div>;
+}
+
+function UsersView({ accounts, onChange }) {
+  const { s } = useLang();
+  const t = s.users;
+  const validPin = (v) => /^\d{4,8}$/.test(v);
+  const [cur, setCur] = useState("");
+  const [np, setNp] = useState("");
+  const [np2, setNp2] = useState("");
+  const [ownerMsg, setOwnerMsg] = useState({ type: "", text: "" });
+  const [name, setName] = useState("");
+  const [pin, setPin] = useState("");
+  const [addMsg, setAddMsg] = useState({ type: "", text: "" });
+  const [editId, setEditId] = useState(null);
+  const [editPin, setEditPin] = useState("");
+  const [delId, setDelId] = useState(null);
+
+  const changeOwner = () => {
+    if (cur !== accounts.owner.pin) return setOwnerMsg({ type: "err", text: t.wrongCurrent });
+    if (!validPin(np)) return setOwnerMsg({ type: "err", text: s.auth.errLen });
+    if (np !== np2) return setOwnerMsg({ type: "err", text: s.auth.errMatch });
+    onChange((a) => ({ ...a, owner: { pin: np } }));
+    setCur(""); setNp(""); setNp2("");
+    setOwnerMsg({ type: "ok", text: t.pinChanged });
+  };
+
+  const addSeller = () => {
+    const n = name.trim();
+    if (!n) return setAddMsg({ type: "err", text: t.nameRequired });
+    if (accounts.sellers.some((x) => x.name.toLowerCase() === n.toLowerCase())) return setAddMsg({ type: "err", text: t.nameExists });
+    if (!validPin(pin)) return setAddMsg({ type: "err", text: s.auth.errLen });
+    onChange((a) => ({ ...a, sellers: [...a.sellers, { id: "s" + Date.now(), name: n, pin }] }));
+    setName(""); setPin("");
+    setAddMsg({ type: "ok", text: t.sellerAdded });
+  };
+
+  const savePin = (id) => {
+    if (!validPin(editPin)) return setAddMsg({ type: "err", text: s.auth.errLen });
+    onChange((a) => ({ ...a, sellers: a.sellers.map((x) => (x.id === id ? { ...x, pin: editPin } : x)) }));
+    setEditId(null); setEditPin("");
+    setAddMsg({ type: "ok", text: t.saved });
+  };
+
+  const remove = (id) => {
+    if (delId !== id) {
+      setDelId(id);
+      return;
+    }
+    onChange((a) => ({ ...a, sellers: a.sellers.filter((x) => x.id !== id) }));
+    setDelId(null);
+  };
+
+  return (
+    <div>
+      <PageHeader title={t.title} subtitle={t.subtitle} icon={Users} />
+
+      <div className="mb-6 bg-amber-50 border border-amber-200 rounded-xl px-4 py-3 text-xs text-amber-800">{t.deviceNote}</div>
+
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <Card className="p-5">
+          <div className="text-xs font-medium tracking-wide text-slate-500 uppercase mb-4">{t.ownerPin}</div>
+          <div className="space-y-4">
+            <Field label={t.currentPin}>
+              <PinInput value={cur} onChange={(v) => { setCur(v); setOwnerMsg({ type: "", text: "" }); }} placeholder="••••" />
+            </Field>
+            <Field label={t.newPin}>
+              <PinInput value={np} onChange={(v) => { setNp(v); setOwnerMsg({ type: "", text: "" }); }} placeholder="••••" />
+            </Field>
+            <Field label={t.confirmPin}>
+              <PinInput value={np2} onChange={(v) => { setNp2(v); setOwnerMsg({ type: "", text: "" }); }} placeholder="••••" onEnter={changeOwner} />
+            </Field>
+          </div>
+          <Msg msg={ownerMsg} />
+          <PrimaryButton onClick={changeOwner} className="mt-5">
+            {t.changePin}
+          </PrimaryButton>
+        </Card>
+
+        <Card className="p-5">
+          <div className="text-xs font-medium tracking-wide text-slate-500 uppercase mb-4">{t.sellers}</div>
+
+          {accounts.sellers.length === 0 ? (
+            <div className="text-sm text-slate-500 mb-5">{t.noneYet}</div>
+          ) : (
+            <div className="border border-slate-200 rounded-xl divide-y divide-slate-200 mb-5">
+              {accounts.sellers.map((x) => (
+                <div key={x.id} className="px-4 py-3">
+                  <div className="flex items-center justify-between gap-3 flex-wrap">
+                    <div className="flex items-center gap-3 min-w-0">
+                      <div className="w-8 h-8 rounded-full bg-violet-100 text-violet-700 flex items-center justify-center text-sm font-semibold shrink-0">
+                        {x.name.charAt(0).toUpperCase()}
+                      </div>
+                      <span className="text-sm font-medium text-slate-900 truncate">{x.name}</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <GhostButton onClick={() => { setEditId(editId === x.id ? null : x.id); setEditPin(""); setDelId(null); }}>
+                        {t.editPin}
+                      </GhostButton>
+                      <GhostButton onClick={() => remove(x.id)} className={delId === x.id ? "!border-rose-300 !text-rose-600" : ""}>
+                        <Trash2 size={13} /> {delId === x.id ? t.confirmRemove : t.remove}
+                      </GhostButton>
+                    </div>
+                  </div>
+                  {editId === x.id && (
+                    <div className="mt-3 flex flex-col sm:flex-row gap-2">
+                      <div className="flex-1">
+                        <PinInput value={editPin} onChange={setEditPin} placeholder={t.newPin} onEnter={() => savePin(x.id)} />
+                      </div>
+                      <PrimaryButton onClick={() => savePin(x.id)} className="justify-center">{t.save}</PrimaryButton>
+                    </div>
+                  )}
+                </div>
+              ))}
+            </div>
+          )}
+
+          <div className="text-xs font-medium tracking-wide text-slate-500 uppercase mb-3">{t.addSeller}</div>
+          <div className="space-y-4">
+            <Field label={t.sellerName}>
+              <input value={name} onChange={(e) => { setName(e.target.value); setAddMsg({ type: "", text: "" }); }} placeholder={t.sellerNamePh} className={inputCls} />
+            </Field>
+            <Field label={t.sellerPin}>
+              <PinInput value={pin} onChange={(v) => { setPin(v); setAddMsg({ type: "", text: "" }); }} placeholder="••••" onEnter={addSeller} />
+            </Field>
+          </div>
+          <Msg msg={addMsg} />
+          <PrimaryButton onClick={addSeller} className="mt-5">
+            <Plus size={15} /> {t.add}
+          </PrimaryButton>
+        </Card>
       </div>
     </div>
   );
@@ -2227,7 +2761,7 @@ function SidebarBody({ view, setView, pendingCount, expiredStockCount, expiringS
     if (onNavigate) onNavigate();
   };
   const allowed = ROLE_ACCESS[user.role];
-  const roleLabel = user.role === "owner" ? s.auth.owner : s.auth.seller;
+  const roleLabel = user.role === "owner" ? s.auth.owner : user.name;
   return (
     <>
       <div>
@@ -2288,6 +2822,14 @@ function SidebarBody({ view, setView, pendingCount, expiredStockCount, expiringS
             </div>
           </div>
         )}
+        {user.role === "owner" && (
+          <button
+            onClick={() => go("users")}
+            className="mx-4 mb-3 w-auto self-stretch flex items-center justify-center gap-2 bg-violet-600 hover:bg-violet-500 text-white text-sm font-medium px-4 py-2.5 rounded-xl shadow-md transition-colors"
+          >
+            <Plus size={16} /> {s.users.addSeller}
+          </button>
+        )}
         <div className="mx-4 mb-5 p-3 rounded-xl bg-violet-50 border border-violet-100 flex items-center gap-3">
           <div className="w-9 h-9 rounded-full bg-violet-600 text-white flex items-center justify-center font-semibold text-sm shrink-0">
             {roleLabel.charAt(0)}
@@ -2312,10 +2854,16 @@ export default function App() {
   const [showHelp, setShowHelp] = useState(false);
   const [createdBill, setCreatedBill] = useState(null);
   const [menuOpen, setMenuOpen] = useState(false);
+  const [accounts, setAccounts] = useState(loadAccounts);
   const [user, setUser] = useState(() => {
     try {
-      const r = sessionStorage.getItem("bm_role");
-      return r && USERS[r] ? { role: r } : null;
+      const raw = sessionStorage.getItem(SESSION_KEY);
+      const saved = raw ? JSON.parse(raw) : null;
+      const acc = loadAccounts();
+      if (!saved || !acc) return null;
+      if (saved.role === "owner") return { role: "owner" };
+      const found = acc.sellers.find((x) => x.id === saved.id);
+      return found ? { role: "seller", id: found.id, name: found.name } : null;
     } catch (e) {
       return null;
     }
@@ -2324,19 +2872,34 @@ export default function App() {
 
   const s = STRINGS[lang];
 
-  const login = (role) => {
-    try { sessionStorage.setItem("bm_role", role); } catch (e) { /* storage may be blocked */ }
-    setUser({ role });
+  const updateAccounts = (fn) => {
+    setAccounts((prev) => {
+      const next = fn(prev);
+      saveAccounts(next);
+      return next;
+    });
+  };
+  const login = (u) => {
+    try { sessionStorage.setItem(SESSION_KEY, JSON.stringify(u)); } catch (e) { /* storage may be blocked */ }
+    setUser(u);
     setView("create");
   };
+  const setupOwner = (pin) => {
+    const next = { owner: { pin }, sellers: [] };
+    saveAccounts(next);
+    setAccounts(next);
+    login({ role: "owner" });
+    setView("users");
+  };
   const logout = () => {
-    try { sessionStorage.removeItem("bm_role"); } catch (e) { /* ignore */ }
+    try { sessionStorage.removeItem(SESSION_KEY); } catch (e) { /* ignore */ }
     setUser(null);
     setMenuOpen(false);
     setCreatedBill(null);
   };
   const allowedViews = user ? ROLE_ACCESS[user.role] : [];
   const activeView = allowedViews.includes(view) ? view : "create";
+  const displayName = user ? (user.role === "owner" ? s.auth.owner : user.name) : "";
 
   const pendingCount = bills.filter((b) => b.status === "pending").length;
   const expiredStockCount = inventory.filter((it) => daysBetween(it.expiry, TODAY) < 0).length;
@@ -2410,7 +2973,8 @@ export default function App() {
         * { box-sizing: border-box; }
       `}</style>
 
-      {!user && !customerMode && <LoginScreen onLogin={login} onCustomer={() => setCustomerMode(true)} />}
+      {!user && !customerMode && !accounts && <SetupScreen onDone={setupOwner} />}
+      {!user && !customerMode && accounts && <LoginScreen accounts={accounts} onLogin={login} onCustomer={() => setCustomerMode(true)} />}
       {!user && customerMode && <CustomerPage bills={bills} onPay={handlePay} onBack={() => setCustomerMode(false)} />}
 
       {user && (
@@ -2429,7 +2993,7 @@ export default function App() {
                 onClick={() => setMenuOpen(true)}
                 className="w-9 h-9 rounded-full bg-violet-600 text-white font-semibold text-sm flex items-center justify-center"
               >
-                {(user.role === "owner" ? s.auth.owner : s.auth.seller).charAt(0)}
+                {displayName.charAt(0)}
               </button>
             </div>
           </header>
@@ -2451,6 +3015,14 @@ export default function App() {
 
           {/* Main */}
           <main className="flex-1 min-w-0 w-full mx-auto px-4 pt-5 pb-28 md:px-8 md:py-8 max-w-6xl relative">
+            {user.role === "owner" && accounts && accounts.sellers.length === 0 && activeView !== "users" && (
+              <div className="mb-5 bg-violet-50 border border-violet-200 rounded-2xl px-4 py-3 flex items-center justify-between gap-3 flex-wrap">
+                <span className="text-sm text-violet-900">{s.users.noSellerBanner}</span>
+                <PrimaryButton onClick={() => setView("users")}>
+                  <Plus size={15} /> {s.users.addSeller}
+                </PrimaryButton>
+              </div>
+            )}
             {activeView === "create" && <CreateBillView inventory={inventory} onGenerate={handleGenerateBill} />}
             {activeView === "pending" && <PendingBillsView bills={bills} onMarkPaid={handleMarkPaid} />}
             {activeView === "pay" && <PayView bills={bills} onPay={handlePay} />}
@@ -2460,6 +3032,7 @@ export default function App() {
               <StockManagementView inventory={inventory} onStockChange={handleStockChange} auditLog={auditLog} addAudit={addAudit} />
             )}
             {activeView === "transfer" && <TransferView inventory={inventory} transfers={transfers} onSubmitTransfer={handleSubmitTransfer} />}
+            {activeView === "users" && accounts && <UsersView accounts={accounts} onChange={updateAccounts} />}
           </main>
 
           {/* Mobile bottom navigation */}
